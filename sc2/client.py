@@ -447,6 +447,7 @@ class Client(Protocol):
     ):
         """Usage example (will spawn 5 marines in the center of the map for player ID 1):
         await self._client.debug_create_unit([[UnitTypeId.MARINE, 5, self._game_info.map_center, 1]])
+
         :param unit_spawn_commands:"""
         assert isinstance(unit_spawn_commands, list)
         assert unit_spawn_commands
@@ -496,7 +497,9 @@ class Client(Protocol):
         )
 
     async def move_camera(self, position: Union[Unit, Units, Point2, Point3]):
-        """ Moves camera to the target position """
+        """Moves camera to the target position
+
+        :param position:"""
         assert isinstance(position, (Unit, Units, Point2, Point3))
         if isinstance(position, Units):
             position = position.center
@@ -517,7 +520,9 @@ class Client(Protocol):
         )
 
     async def obs_move_camera(self, position: Union[Unit, Units, Point2, Point3]):
-        """ Moves observer camera to the target position """
+        """Moves observer camera to the target position. Only works when observing (e.g. watching the replay).
+
+        :param position:"""
         assert isinstance(position, (Unit, Units, Point2, Point3))
         if isinstance(position, Units):
             position = position.center
@@ -565,7 +570,14 @@ class Client(Protocol):
         color: Union[tuple, list, Point3] = None,
         size: int = 8,
     ):
-        """ Draws a text on the screen (monitor / game window) with coordinates 0 <= x, y <= 1. """
+        """
+        Draws a text on the screen (monitor / game window) with coordinates 0 <= x, y <= 1.
+
+        :param text:
+        :param pos:
+        :param color:
+        :param size:
+        """
         assert len(pos) >= 2
         assert 0 <= pos[0] <= 1
         assert 0 <= pos[1] <= 1
@@ -586,18 +598,22 @@ class Client(Protocol):
     def debug_text_world(
         self,
         text: str,
-        pos: Union[Unit, Point2, Point3],
+        pos: Union[Unit, Point3],
         color: Union[tuple, list, Point3] = None,
         size: int = 8,
     ):
-        """Draws a text at Point3 position in the game world.
+        """
+        Draws a text at Point3 position in the game world.
         To grab a unit's 3d position, use unit.position3d
         Usually the Z value of a Point3 is between 8 and 14 (except for flying units). Use self.get_terrain_z_height() from bot_ai.py to get the Z value (height) of the terrain at a 2D position.
+
+        :param text:
+        :param color:
+        :param size:
         """
         if isinstance(pos, Unit):
             pos = pos.position3d
-        elif not isinstance(pos, Point3):
-            pos = Point3((pos.x, pos.y, 0))
+        assert isinstance(pos, Point3)
         self._debug_texts.append(
             DrawItemWorldText(text=text, color=color, start_point=pos, font_size=size)
         )
@@ -605,7 +621,7 @@ class Client(Protocol):
     def debug_text_3d(
         self,
         text: str,
-        pos: Union[Unit, Point2, Point3],
+        pos: Union[Unit, Point3],
         color: Union[tuple, list, Point3] = None,
         size: int = 8,
     ):
@@ -613,53 +629,66 @@ class Client(Protocol):
 
     def debug_line_out(
         self,
-        p0: Union[Unit, Point2, Point3],
-        p1: Union[Unit, Point2, Point3],
+        p0: Union[Unit, Point3],
+        p1: Union[Unit, Point3],
         color: Union[tuple, list, Point3] = None,
     ):
+        """
+        Draws a line from p0 to p1.
+
+        :param p0:
+        :param p1:
+        :param color:
+        """
         if isinstance(p0, Unit):
             p0 = p0.position3d
-        elif not isinstance(p0, Point3):
-            p0 = Point3((p0.x, p0.y, 0))
+        assert isinstance(p0, Point3)
         if isinstance(p1, Unit):
             p1 = p1.position3d
-        elif not isinstance(p1, Point3):
-            p1 = Point3((p1.x, p1.y, 0))
-        """ Draws a line from p0 to p1. """
+        assert isinstance(p1, Point3)
         self._debug_lines.append(
             DrawItemLine(color=color, start_point=p0, end_point=p1)
         )
 
     def debug_box_out(
         self,
-        p_min: Union[Unit, Point2, Point3],
-        p_max: Union[Unit, Point2, Point3],
+        p_min: Union[Unit, Point3],
+        p_max: Union[Unit, Point3],
         color: Union[tuple, list, Point3] = None,
     ):
-        """ Draws a box with p_min and p_max as corners of the box. """
+        """
+        Draws a box with p_min and p_max as corners of the box.
+
+        :param p_min:
+        :param p_max:
+        :param color:
+        """
         if isinstance(p_min, Unit):
             p_min = p_min.position3d
-        elif not isinstance(p_min, Point3):
-            p_min = Point3((p_min.x, p_min.y, 0))
+        assert isinstance(p_min, Point3)
         if isinstance(p_max, Unit):
             p_max = p_max.position3d
-        elif not isinstance(p_max, Point3):
-            p_max = Point3((p_max.x, p_max.y, 0))
+        assert isinstance(p_max, Point3)
         self._debug_boxes.append(
             DrawItemBox(start_point=p_min, end_point=p_max, color=color)
         )
 
     def debug_box2_out(
         self,
-        pos: Union[Unit, Point2, Point3],
+        pos: Union[Unit, Point3],
         half_vertex_length: float = 0.25,
         color: Union[tuple, list, Point3] = None,
     ):
-        """ Draws a box center at a position 'pos', with box side lengths (vertices) of two times 'half_vertex_length'. """
+        """
+        Draws a box center at a position 'pos', with box side lengths (vertices) of two times 'half_vertex_length'.
+
+        :param pos:
+        :param half_vertex_length:
+        :param color:
+        """
         if isinstance(pos, Unit):
             pos = pos.position3d
-        elif not isinstance(pos, Point3):
-            pos = Point3((pos.x, pos.y, 0))
+        assert isinstance(pos, Point3)
         p0 = pos + Point3(
             (-half_vertex_length, -half_vertex_length, -half_vertex_length)
         )
@@ -667,16 +696,18 @@ class Client(Protocol):
         self._debug_boxes.append(DrawItemBox(start_point=p0, end_point=p1, color=color))
 
     def debug_sphere_out(
-        self,
-        p: Union[Unit, Point2, Point3],
-        r: Union[int, float],
-        color: Union[tuple, list, Point3] = None,
+        self, p: Union[Unit, Point3], r: float, color: Union[tuple, list, Point3] = None
     ):
-        """ Draws a sphere at point p with radius r. """
+        """
+        Draws a sphere at point p with radius r.
+
+        :param p:
+        :param r:
+        :param color:
+        """
         if isinstance(p, Unit):
             p = p.position3d
-        elif not isinstance(p, Point3):
-            p = Point3((p.x, p.y, 0))
+        assert isinstance(p, Point3)
         self._debug_spheres.append(DrawItemSphere(start_point=p, radius=r, color=color))
 
     async def _send_debug(self):
