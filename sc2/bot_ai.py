@@ -78,6 +78,7 @@ class BotAI(DistanceCalculation):
         self.units: Units = Units([], self)
         self.workers: Units = Units([], self)
         self.larva: Units = Units([], self)
+        self.eggs: Units = Units([], self)
         self.structures: Units = Units([], self)
         self.townhalls: Units = Units([], self)
         self.gas_buildings: Units = Units([], self)
@@ -1790,6 +1791,8 @@ class BotAI(DistanceCalculation):
                             self.workers.append(unit_obj)
                         elif unit_id == UnitTypeId.LARVA:
                             self.larva.append(unit_obj)
+                        elif unit_id == UnitTypeId.EGG:
+                            self.eggs.append(unit_obj)
                 # Alliance.Enemy.value = 4
                 elif alliance == 4:
                     self.all_enemy_units.append(unit_obj)
