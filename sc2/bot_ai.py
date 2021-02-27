@@ -1709,6 +1709,7 @@ class BotAI(DistanceCalculation):
         self.units: Units = Units([], self)
         self.workers: Units = Units([], self)
         self.larva: Units = Units([], self)
+        self.eggs: Units = Units([], self)
         self.structures: Units = Units([], self)
         self.townhalls: Units = Units([], self)
         self.gas_buildings: Units = Units([], self)
