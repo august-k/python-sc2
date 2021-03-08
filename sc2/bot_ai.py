@@ -1426,7 +1426,7 @@ class BotAI(DistanceCalculation):
         self,
         action: UnitCommand,
         subtract_cost: bool = False,
-        subtract_supply: bool = False,
+        subtract_supply: bool = True,
         can_afford_check: bool = False,
         ignore_warning: bool = False,
     ) -> bool:
