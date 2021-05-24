@@ -159,6 +159,13 @@ class UnitTypeData:
         return self._game_data.abilities[self._proto.ability_id]
 
     @property
+    def footprint_radius(self) -> Optional[float]:
+        """ See unit.py footprint_radius """
+        if self.creation_ability is None:
+            return None
+        return self.creation_ability._proto.footprint_radius
+
+    @property
     def attributes(self) -> List[Attribute]:
         return self._proto.attributes
 
@@ -190,10 +197,10 @@ class UnitTypeData:
 
     @property
     def tech_alias(self) -> Optional[List[UnitTypeId]]:
-        """ Building tech equality, e.g. OrbitalCommand is the same as CommandCenter
+        """Building tech equality, e.g. OrbitalCommand is the same as CommandCenter
         Building tech equality, e.g. Hive is the same as Lair and Hatchery
         For Hive, this returns [UnitTypeId.Hatchery, UnitTypeId.Lair]
-        For SCV, this returns None """
+        For SCV, this returns None"""
         return_list = [
             UnitTypeId(tech_alias) for tech_alias in self._proto.tech_alias if tech_alias in self._game_data.units
         ]
@@ -278,6 +285,11 @@ class UpgradeData:
 
 
 class Cost:
+    """
+    The cost of an action, a structure, a unit or a research upgrade.
+    The time is given in frames (22.4 frames per game second).
+    """
+
     def __init__(self, minerals: int, vespene: int, time: float = None):
         """
         :param minerals:
