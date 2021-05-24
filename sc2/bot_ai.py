@@ -1530,25 +1530,37 @@ class BotAI(DistanceCalculation):
         """
         :param action:
         """
-        # Always add actions if queued
-        if action.queue:
-            return True
+        # prevent move command if unit is already at target position
+        with suppress(AttributeError):
+            if (
+                action.ability == AbilityId.MOVE_MOVE
+                and action.target == action.unit.position.rounded
+            ):
+                return False
+
         if action.unit.orders:
             # action: UnitCommand
             # current_action: UnitOrder
-            current_action = action.unit.orders[0]
-            if current_action.ability.id != action.ability and current_action.ability.exact_id != action.ability:
-                # Different action, return True
+            for current_action in action.unit.orders:
+                # current_action = action.unit.orders[0]
+                if (
+                    current_action.ability.id != action.ability
+                    and current_action.ability.exact_id != action.ability
+                ):
+                    # Different action, return True
+                    return True
+                with suppress(AttributeError):
+                    if current_action.target == action.target.tag:
+                        # Same action, remove action if same target unit
+                        return False
+                with suppress(AttributeError):
+                    if (
+                        action.target.x == current_action.target.x
+                        and action.target.y == current_action.target.y
+                    ):
+                        # Same action, remove action if same target position
+                        return False
                 return True
-            with suppress(AttributeError):
-                if current_action.target == action.target.tag:
-                    # Same action, remove action if same target unit
-                    return False
-            with suppress(AttributeError):
-                if action.target.x == current_action.target.x and action.target.y == current_action.target.y:
-                    # Same action, remove action if same target position
-                    return False
-            return True
         return True
 
     async def chat_send(self, message: str, team_only: bool = False):
