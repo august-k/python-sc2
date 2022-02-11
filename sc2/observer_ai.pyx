@@ -106,11 +106,11 @@ class ObserverAI(DistanceCalculation):
         """Returns time in seconds, assumes the game is played on 'faster'"""
         return self.state.game_loop / 22.4  # / (1/1.4) * (1/16)
 
-    @property
-    def time_formatted(self) -> str:
-        """Returns time as string in min:sec format"""
-        t = self.time
-        return f"{int(t // 60):02}:{int(t % 60):02}"
+    # @property
+    # def time_formatted(self) -> str:
+    #     """Returns time as string in min:sec format"""
+    #     t = self.time
+    #     return f"{int(t // 60):02}:{int(t % 60):02}"
 
     @property
     def game_info(self) -> GameInfo:

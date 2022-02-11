@@ -33,3 +33,8 @@ mini_games/
 /bat_files/temp/
 
 /docs
+
+# Cython things
+*.c
+*.pyd
+*.html

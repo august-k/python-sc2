@@ -94,7 +94,8 @@ class AbilityData:
         assert self.id != 0
 
     def __repr__(self) -> str:
-        return f"AbilityData(name={self._proto.button_name})"
+        # return f"AbilityData(name={self._proto.button_name})"
+        return "AbilityData(name=" + str(self._proto.button_name) + ")"
 
     @property
     def id(self) -> AbilityId:
@@ -150,7 +151,8 @@ class UnitTypeData:
         self._proto = proto
 
     def __repr__(self) -> str:
-        return f"UnitTypeData(name={self.name})"
+        # return f"UnitTypeData(name={self.name})"
+        return "UnitTypeData(name=" + str(self.name) + ")"
 
     @property
     def id(self) -> UnitTypeId:
@@ -288,7 +290,14 @@ class UpgradeData:
         self._proto = proto
 
     def __repr__(self):
-        return f"UpgradeData({self.name} - research ability: {self.research_ability}, {self.cost})"
+        # return f"UpgradeData({self.name} - research ability: {self.research_ability}, {self.cost})"
+        return f"UpgradeData("\
+               + str(self.name)\
+               + " - research ability: "\
+               + str(self.research_ability)\
+               + ", "\
+               + str(self.cost)\
+               + ")"
 
     @property
     def name(self) -> str:
@@ -328,7 +337,8 @@ class Cost:
         self.time = time
 
     def __repr__(self) -> str:
-        return f"Cost({self.minerals}, {self.vespene})"
+        # return f"Cost({self.minerals}, {self.vespene})"
+        return "Cost(" + str(self.minerals) + ", " + str(self.vespene) + ")"
 
     def __eq__(self, other: Cost) -> bool:
         return self.minerals == other.minerals and self.vespene == other.vespene

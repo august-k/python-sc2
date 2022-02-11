@@ -128,8 +128,8 @@ class EffectData:
             return self._proto.radius
 
     def __repr__(self) -> str:
-        return f"{self.id} with radius {self.radius} at {self.positions}"
-
+        # return f"{self.id} with radius {self.radius} at {self.positions}"
+        return str(self.id) + " with radius " + str(self.radius) + " at " + str(self.positions) + ")"
 
 class GameState:
     def __init__(self, response_observation):

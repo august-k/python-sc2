@@ -97,7 +97,8 @@ class UnitOrder:
         self.progress: float = progress
 
     def __repr__(self) -> str:
-        return f"UnitOrder({self.ability}, {self.target}, {self.progress})"
+        # return f"UnitOrder({self.ability}, {self.target}, {self.progress})"
+        return "UnitOrder(" + str(self.ability) + ", " + str(self.target) + ", " + str(self.progress) + ")"
 
 
 class Unit:
@@ -125,7 +126,8 @@ class Unit:
 
     def __repr__(self) -> str:
         """Returns string of this form: Unit(name='SCV', tag=4396941328)."""
-        return f"Unit(name={self.name !r}, tag={self.tag})"
+        # return f"Unit(name={self.name !r}, tag={self.tag})"
+        return "Unit(name='" + str(self.name) + "', tag=" + str(self.tag) + ")"
 
     @property_immutable_cache
     def type_id(self) -> UnitTypeId:
