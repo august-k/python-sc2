@@ -13,7 +13,10 @@ from loguru import logger
 class ProtocolError(Exception):
     @property
     def is_game_over_error(self) -> bool:
-        return self.args[0] in ["['Game has already ended']", "['Not supported if game has already ended']"]
+        return self.args[0] in [
+            "['Game has already ended']",
+            "['Not supported if game has already ended']",
+        ]
 
 
 class ConnectionAlreadyClosed(ProtocolError):

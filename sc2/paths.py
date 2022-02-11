@@ -106,13 +106,21 @@ def latest_executeble(versions_dir, base_build=None):
         try:
             latest = (
                 int(base_build[4:]),
-                max(p for p in versions_dir.iterdir() if p.is_dir() and p.name.startswith(str(base_build))),
+                max(
+                    p
+                    for p in versions_dir.iterdir()
+                    if p.is_dir() and p.name.startswith(str(base_build))
+                ),
             )
         except ValueError:
             pass
 
     if base_build is None or latest is None:
-        latest = max((int(p.name[4:]), p) for p in versions_dir.iterdir() if p.is_dir() and p.name.startswith("Base"))
+        latest = max(
+            (int(p.name[4:]), p)
+            for p in versions_dir.iterdir()
+            if p.is_dir() and p.name.startswith("Base")
+        )
 
     version, path = latest
 
@@ -123,7 +131,7 @@ def latest_executeble(versions_dir, base_build=None):
 
 
 class _MetaPaths(type):
-    """"Lazily loads paths to allow importing the library even if SC2 isn't installed."""
+    """ "Lazily loads paths to allow importing the library even if SC2 isn't installed."""
 
     def __setup(self):
         if PF not in BASEDIR:
@@ -143,7 +151,9 @@ class _MetaPaths(type):
             else:
                 self.MAPS = self.BASE / "Maps"
         except FileNotFoundError as e:
-            logger.critical(f"SC2 installation not found: File '{e.filename}' does not exist.")
+            logger.critical(
+                f"SC2 installation not found: File '{e.filename}' does not exist."
+            )
             exit(1)
 
     def __getattr__(self, attr):

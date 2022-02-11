@@ -108,12 +108,12 @@ class EffectData:
 
     @property
     def is_mine(self) -> bool:
-        """ Checks if the effect is caused by me. """
+        """Checks if the effect is caused by me."""
         return self._proto.alliance == IS_MINE
 
     @property
     def is_enemy(self) -> bool:
-        """ Checks if the effect is hostile. """
+        """Checks if the effect is hostile."""
         return self._proto.alliance == IS_ENEMY
 
     @property
@@ -137,8 +137,12 @@ class GameState:
         :param response_observation:
         """
         self.response_observation = response_observation
-        self.actions = response_observation.actions  # successful actions since last loop
-        self.action_errors = response_observation.action_errors  # error actions since last loop
+        self.actions = (
+            response_observation.actions
+        )  # successful actions since last loop
+        self.action_errors = (
+            response_observation.action_errors
+        )  # error actions since last loop
 
         # https://github.com/Blizzard/s2client-proto/blob/51662231c0965eba47d5183ed0a6336d5ae6b640/s2clientprotocol/sc2api.proto#L575
         self.observation = response_observation.observation
@@ -149,23 +153,37 @@ class GameState:
         self.common: Common = Common(self.observation.player_common)
 
         # Area covered by Pylons and Warpprisms
-        self.psionic_matrix: PsionicMatrix = PsionicMatrix.from_proto(self.observation_raw.player.power_sources)
-        self.game_loop: int = self.observation.game_loop  # 22.4 per second on faster game speed
+        self.psionic_matrix: PsionicMatrix = PsionicMatrix.from_proto(
+            self.observation_raw.player.power_sources
+        )
+        self.game_loop: int = (
+            self.observation.game_loop
+        )  # 22.4 per second on faster game speed
 
         # https://github.com/Blizzard/s2client-proto/blob/33f0ecf615aa06ca845ffe4739ef3133f37265a9/s2clientprotocol/score.proto#L31
         self.score: ScoreDetails = ScoreDetails(self.observation.score)
         self.abilities = self.observation.abilities  # abilities of selected units
-        self.upgrades: Set[UpgradeId] = {UpgradeId(upgrade) for upgrade in self.observation_raw.player.upgrade_ids}
+        self.upgrades: Set[UpgradeId] = {
+            UpgradeId(upgrade) for upgrade in self.observation_raw.player.upgrade_ids
+        }
 
         # Set of unit tags that died this step
-        self.dead_units: Set[int] = {dead_unit_tag for dead_unit_tag in self.observation_raw.event.dead_units}
+        self.dead_units: Set[int] = {
+            dead_unit_tag for dead_unit_tag in self.observation_raw.event.dead_units
+        }
         # self.visibility[point]: 0=Hidden, 1=Fogged, 2=Visible
-        self.visibility: PixelMap = PixelMap(self.observation_raw.map_state.visibility, mirrored=False)
+        self.visibility: PixelMap = PixelMap(
+            self.observation_raw.map_state.visibility, mirrored=False
+        )
         # self.creep[point]: 0=No creep, 1=creep
-        self.creep: PixelMap = PixelMap(self.observation_raw.map_state.creep, in_bits=True, mirrored=False)
+        self.creep: PixelMap = PixelMap(
+            self.observation_raw.map_state.creep, in_bits=True, mirrored=False
+        )
 
         # Effects like ravager bile shot, lurker attack, everything in effect_id.py
-        self.effects: Set[EffectData] = {EffectData(effect) for effect in self.observation_raw.effects}
+        self.effects: Set[EffectData] = {
+            EffectData(effect) for effect in self.observation_raw.effects
+        }
         """ Usage:
         for effect in self.state.effects:
             if effect.id == EffectId.RAVAGERCORROSIVEBILECP:

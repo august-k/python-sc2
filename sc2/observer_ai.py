@@ -15,7 +15,16 @@ from sc2.constants import (
     PROTOSS_TECH_REQUIREMENT,
     ZERG_TECH_REQUIREMENT,
 )
-from sc2.data import ActionResult, Alert, Race, Result, Target, race_gas, race_townhalls, race_worker
+from sc2.data import (
+    ActionResult,
+    Alert,
+    Race,
+    Result,
+    Target,
+    race_gas,
+    race_townhalls,
+    race_worker,
+)
 from sc2.distances import DistanceCalculation
 from sc2.game_data import AbilityData, GameData
 
@@ -94,28 +103,28 @@ class ObserverAI(DistanceCalculation):
 
     @property
     def time(self) -> float:
-        """ Returns time in seconds, assumes the game is played on 'faster' """
+        """Returns time in seconds, assumes the game is played on 'faster'"""
         return self.state.game_loop / 22.4  # / (1/1.4) * (1/16)
 
     @property
     def time_formatted(self) -> str:
-        """ Returns time as string in min:sec format """
+        """Returns time as string in min:sec format"""
         t = self.time
         return f"{int(t // 60):02}:{int(t % 60):02}"
 
     @property
     def game_info(self) -> GameInfo:
-        """ See game_info.py """
+        """See game_info.py"""
         return self._game_info
 
     @property
     def game_data(self) -> GameData:
-        """ See game_data.py """
+        """See game_data.py"""
         return self._game_data
 
     @property
     def client(self) -> Client:
-        """ See client.py """
+        """See client.py"""
         return self._client
 
     def alert(self, alert_code: Alert) -> bool:
@@ -173,7 +182,9 @@ class ObserverAI(DistanceCalculation):
         return self._game_info.start_locations
 
     async def get_available_abilities(
-        self, units: Union[List[Unit], Units], ignore_resource_requirements: bool = False
+        self,
+        units: Union[List[Unit], Units],
+        ignore_resource_requirements: bool = False,
     ) -> List[List[AbilityId]]:
         """Returns available abilities of one or more units. Right now only checks cooldown, energy cost, and whether the ability has been researched.
 
@@ -187,7 +198,9 @@ class ObserverAI(DistanceCalculation):
 
         :param units:
         :param ignore_resource_requirements:"""
-        return await self._client.query_available_abilities(units, ignore_resource_requirements)
+        return await self._client.query_available_abilities(
+            units, ignore_resource_requirements
+        )
 
     @property_cache_once_per_frame
     def _abilities_all_units(self) -> Counter:
@@ -201,11 +214,15 @@ class ObserverAI(DistanceCalculation):
                 if self.race != Race.Terran or not unit.is_structure:
                     # If an SCV is constructing a building, already_pending would count this structure twice
                     # (once from the SCV order, and once from "not structure.is_ready")
-                    abilities_amount[self._game_data.units[unit.type_id.value].creation_ability] += 1
+                    abilities_amount[
+                        self._game_data.units[unit.type_id.value].creation_ability
+                    ] += 1
 
         return abilities_amount
 
-    def _prepare_start(self, client, player_id, game_info, game_data, realtime: bool = False):
+    def _prepare_start(
+        self, client, player_id, game_info, game_data, realtime: bool = False
+    ):
         """
         Ran until game start to set game and player data.
 
@@ -225,7 +242,10 @@ class ObserverAI(DistanceCalculation):
         """First step extra preparations. Must not be called before _prepare_step."""
         if self.townhalls:
             self._game_info.player_start_location = self.townhalls.first.position
-        self._game_info.map_ramps, self._game_info.vision_blockers = self._game_info._find_ramps_and_vision_blockers()
+        (
+            self._game_info.map_ramps,
+            self._game_info.vision_blockers,
+        ) = self._game_info._find_ramps_and_vision_blockers()
 
     def _prepare_step(self, state, proto_game_info):
         """
@@ -236,7 +256,9 @@ class ObserverAI(DistanceCalculation):
         self.state: GameState = state  # See game_state.py
         # Required for events, needs to be before self.units are initialized so the old units are stored
         self._units_previous_map: Dict = {unit.tag: unit for unit in self.units}
-        self._structures_previous_map: Dict = {structure.tag: structure for structure in self.structures}
+        self._structures_previous_map: Dict = {
+            structure.tag: structure for structure in self.structures
+        }
 
         self._prepare_units()
 
@@ -270,7 +292,7 @@ class ObserverAI(DistanceCalculation):
                 self.units.append(unit_obj)
 
     async def _after_step(self) -> int:
-        """ Executed by main.py after each on_step function. """
+        """Executed by main.py after each on_step function."""
         self.unit_tags_received_action.clear()
         # Commit debug queries
         await self._client._send_debug()
@@ -291,7 +313,10 @@ class ObserverAI(DistanceCalculation):
 
     async def _issue_unit_added_events(self):
         for unit in self.units:
-            if unit.tag not in self._units_previous_map and unit.tag not in self._unit_tags_seen_this_game:
+            if (
+                unit.tag not in self._units_previous_map
+                and unit.tag not in self._unit_tags_seen_this_game
+            ):
                 self._unit_tags_seen_this_game.add(unit.tag)
                 await self.on_unit_created(unit)
 
@@ -304,7 +329,10 @@ class ObserverAI(DistanceCalculation):
     async def _issue_building_events(self):
         for structure in self.structures:
             # Check build_progress < 1 to exclude starting townhall
-            if structure.tag not in self._structures_previous_map and structure.build_progress < 1:
+            if (
+                structure.tag not in self._structures_previous_map
+                and structure.build_progress < 1
+            ):
                 await self.on_building_construction_started(structure)
                 continue
             # From here on, only check completed structure, so we ignore structures with build_progress < 1

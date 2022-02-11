@@ -43,7 +43,9 @@ class Pointlike(tuple):
         :param p2:"""
         return (self[0] - p2[0]) ** 2 + (self[1] - p2[1]) ** 2
 
-    def is_closer_than(self, distance: Union[int, float], p: Union[Unit, Point2]) -> bool:
+    def is_closer_than(
+        self, distance: Union[int, float], p: Union[Unit, Point2]
+    ) -> bool:
         """Check if another point (or unit) is closer than the given distance.
 
         :param distance:
@@ -51,7 +53,9 @@ class Pointlike(tuple):
         p = p.position
         return self.distance_to_point2(p) < distance
 
-    def is_further_than(self, distance: Union[int, float], p: Union[Unit, Point2]) -> bool:
+    def is_further_than(
+        self, distance: Union[int, float], p: Union[Unit, Point2]
+    ) -> bool:
         """Check if another point (or unit) is further than the given distance.
 
         :param distance:
@@ -111,16 +115,26 @@ class Pointlike(tuple):
 
         :param p:
         """
-        return self.__class__(a + b for a, b in itertools.zip_longest(self, p[: len(self)], fillvalue=0))
+        return self.__class__(
+            a + b for a, b in itertools.zip_longest(self, p[: len(self)], fillvalue=0)
+        )
 
     def unit_axes_towards(self, p):
         """
 
         :param p:
         """
-        return self.__class__(_sign(b - a) for a, b in itertools.zip_longest(self, p[: len(self)], fillvalue=0))
+        return self.__class__(
+            _sign(b - a)
+            for a, b in itertools.zip_longest(self, p[: len(self)], fillvalue=0)
+        )
 
-    def towards(self, p: Union[Unit, Pointlike], distance: Union[int, float] = 1, limit: bool = False) -> Pointlike:
+    def towards(
+        self,
+        p: Union[Unit, Pointlike],
+        distance: Union[int, float] = 1,
+        limit: bool = False,
+    ) -> Pointlike:
         """
 
         :param p:
@@ -137,12 +151,16 @@ class Pointlike(tuple):
         if limit:
             distance = min(d, distance)
         return self.__class__(
-            a + (b - a) / d * distance for a, b in itertools.zip_longest(self, p[: len(self)], fillvalue=0)
+            a + (b - a) / d * distance
+            for a, b in itertools.zip_longest(self, p[: len(self)], fillvalue=0)
         )
 
     def __eq__(self, other):
         try:
-            return all(abs(a - b) <= EPSILON for a, b in itertools.zip_longest(self, other, fillvalue=0))
+            return all(
+                abs(a - b) <= EPSILON
+                for a, b in itertools.zip_longest(self, other, fillvalue=0)
+            )
         except:
             return False
 
@@ -173,12 +191,12 @@ class Point2(Pointlike):
 
     @property
     def length(self) -> float:
-        """ This property exists in case Point2 is used as a vector. """
+        """This property exists in case Point2 is used as a vector."""
         return math.hypot(self[0], self[1])
 
     @property
     def normalized(self) -> Point2:
-        """ This property exists in case Point2 is used as a vector. """
+        """This property exists in case Point2 is used as a vector."""
         length = self.length
         # Cannot normalize if length is zero
         assert length
@@ -222,7 +240,9 @@ class Point2(Pointlike):
         tx, ty = self.to2.towards(p.to2, 1)
         angle = math.atan2(ty - self.y, tx - self.x)
         angle = (angle - max_difference) + max_difference * 2 * random.random()
-        return Point2((self.x + math.cos(angle) * distance, self.y + math.sin(angle) * distance))
+        return Point2(
+            (self.x + math.cos(angle) * distance, self.y + math.sin(angle) * distance)
+        )
 
     def circle_intersection(self, p: Point2, r: Union[int, float]) -> Set[Point2]:
         """self is point1, p is point2, r is the radius for circles originating in both points
@@ -242,7 +262,9 @@ class Point2(Pointlike):
         # stretch offset vector in the ratio of remaining distance from center to intersection
         vectorStretchFactor = remainingDistanceFromCenter / (distanceBetweenPoints / 2)
         v = offsetToCenter
-        offsetToCenterStretched = Point2((v.x * vectorStretchFactor, v.y * vectorStretchFactor))
+        offsetToCenterStretched = Point2(
+            (v.x * vectorStretchFactor, v.y * vectorStretchFactor)
+        )
 
         # rotate vector by 90° and -90°
         vectorRotated1 = Point2((offsetToCenterStretched.y, -offsetToCenterStretched.x))
@@ -307,7 +329,7 @@ class Point2(Pointlike):
         return self.distance_to_point2(other) <= dist
 
     def direction_vector(self, other: Point2) -> Point2:
-        """ Converts a vector to a direction that can face vertically, horizontally or diagonal or be zero, e.g. (0, 0), (1, -1), (1, 0) """
+        """Converts a vector to a direction that can face vertically, horizontally or diagonal or be zero, e.g. (0, 0), (1, -1), (1, 0)"""
         return self.__class__((_sign(other.x - self.x), _sign(other.y - self.y)))
 
     def manhattan_distance(self, other: Point2) -> float:
@@ -394,12 +416,12 @@ class Rect(tuple):
 
     @property
     def right(self) -> float:
-        """ Returns the x-coordinate of the rectangle of its right side. """
+        """Returns the x-coordinate of the rectangle of its right side."""
         return self.x + self.width
 
     @property
     def top(self) -> float:
-        """ Returns the y-coordinate of the rectangle of its top side. """
+        """Returns the y-coordinate of the rectangle of its top side."""
         return self.y + self.height
 
     @property

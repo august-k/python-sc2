@@ -1,6 +1,19 @@
 from __future__ import annotations
 from collections import deque
-from typing import Any, Deque, Dict, FrozenSet, Generator, List, Optional, Sequence, Set, Tuple, Union, TYPE_CHECKING
+from typing import (
+    Any,
+    Deque,
+    Dict,
+    FrozenSet,
+    Generator,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
+    TYPE_CHECKING,
+)
 
 import numpy as np
 
@@ -45,7 +58,7 @@ class Ramp:
 
     @property_mutable_cache
     def upper(self) -> Set[Point2]:
-        """ Returns the upper points of a ramp. """
+        """Returns the upper points of a ramp."""
         current_max = -10000
         result = set()
         for p in self._points:
@@ -59,19 +72,27 @@ class Ramp:
 
     @property_mutable_cache
     def upper2_for_ramp_wall(self) -> Set[Point2]:
-        """ Returns the 2 upper ramp points of the main base ramp required for the supply depot and barracks placement properties used in this file. """
+        """Returns the 2 upper ramp points of the main base ramp required for the supply depot and barracks placement properties used in this file."""
         if len(self.upper) > 5:
             # NOTE: this was way too slow on large ramps
             return set()  # HACK: makes this work for now
             # FIXME: please do
 
-        return set(sorted(list(self.upper), key=lambda x: x.distance_to_point2(self.bottom_center), reverse=True)[:2])
+        return set(
+            sorted(
+                list(self.upper),
+                key=lambda x: x.distance_to_point2(self.bottom_center),
+                reverse=True,
+            )[:2]
+        )
 
     @property_immutable_cache
     def top_center(self) -> Point2:
         upper = self.upper
         length = len(upper)
-        pos = Point2((sum(p.x for p in upper) / length, sum(p.y for p in upper) / length))
+        pos = Point2(
+            (sum(p.x for p in upper) / length, sum(p.y for p in upper) / length)
+        )
         return pos
 
     @property_mutable_cache
@@ -91,12 +112,14 @@ class Ramp:
     def bottom_center(self) -> Point2:
         lower = self.lower
         length = len(lower)
-        pos = Point2((sum(p.x for p in lower) / length, sum(p.y for p in lower) / length))
+        pos = Point2(
+            (sum(p.x for p in lower) / length, sum(p.y for p in lower) / length)
+        )
         return pos
 
     @property_immutable_cache
     def barracks_in_middle(self) -> Optional[Point2]:
-        """ Barracks position in the middle of the 2 depots """
+        """Barracks position in the middle of the 2 depots"""
         if len(self.upper) not in {2, 5}:
             return None
         if len(self.upper2_for_ramp_wall) == 2:
@@ -107,11 +130,13 @@ class Ramp:
             intersects = p1.circle_intersection(p2, 5 ** 0.5)
             anyLowerPoint = next(iter(self.lower))
             return max(intersects, key=lambda p: p.distance_to_point2(anyLowerPoint))
-        raise Exception("Not implemented. Trying to access a ramp that has a wrong amount of upper points.")
+        raise Exception(
+            "Not implemented. Trying to access a ramp that has a wrong amount of upper points."
+        )
 
     @property_immutable_cache
     def depot_in_middle(self) -> Optional[Point2]:
-        """ Depot in the middle of the 3 depots """
+        """Depot in the middle of the 3 depots"""
         if len(self.upper) not in {2, 5}:
             return None
         if len(self.upper2_for_ramp_wall) == 2:
@@ -126,11 +151,13 @@ class Ramp:
                 return None
             anyLowerPoint = next(iter(self.lower))
             return max(intersects, key=lambda p: p.distance_to_point2(anyLowerPoint))
-        raise Exception("Not implemented. Trying to access a ramp that has a wrong amount of upper points.")
+        raise Exception(
+            "Not implemented. Trying to access a ramp that has a wrong amount of upper points."
+        )
 
     @property_mutable_cache
     def corner_depots(self) -> Set[Point2]:
-        """ Finds the 2 depot positions on the outside """
+        """Finds the 2 depot positions on the outside"""
         if not self.upper2_for_ramp_wall:
             return set()
         if len(self.upper2_for_ramp_wall) == 2:
@@ -144,19 +171,26 @@ class Ramp:
             # Offset from middle depot to corner depots is (2, 1)
             intersects = center.circle_intersection(depotPosition, 5 ** 0.5)
             return intersects
-        raise Exception("Not implemented. Trying to access a ramp that has a wrong amount of upper points.")
+        raise Exception(
+            "Not implemented. Trying to access a ramp that has a wrong amount of upper points."
+        )
 
     @property_immutable_cache
     def barracks_can_fit_addon(self) -> bool:
-        """ Test if a barracks can fit an addon at natural ramp """
+        """Test if a barracks can fit an addon at natural ramp"""
         # https://i.imgur.com/4b2cXHZ.png
         if len(self.upper2_for_ramp_wall) == 2:
-            return self.barracks_in_middle.x + 1 > max(self.corner_depots, key=lambda depot: depot.x).x
-        raise Exception("Not implemented. Trying to access a ramp that has a wrong amount of upper points.")
+            return (
+                self.barracks_in_middle.x + 1
+                > max(self.corner_depots, key=lambda depot: depot.x).x
+            )
+        raise Exception(
+            "Not implemented. Trying to access a ramp that has a wrong amount of upper points."
+        )
 
     @property_immutable_cache
     def barracks_correct_placement(self) -> Optional[Point2]:
-        """ Corrected placement so that an addon can fit """
+        """Corrected placement so that an addon can fit"""
         if self.barracks_in_middle is None:
             return None
         if len(self.upper2_for_ramp_wall) == 2:
@@ -164,7 +198,9 @@ class Ramp:
                 return self.barracks_in_middle
             else:
                 return self.barracks_in_middle.offset((-2, 0))
-        raise Exception("Not implemented. Trying to access a ramp that has a wrong amount of upper points.")
+        raise Exception(
+            "Not implemented. Trying to access a ramp that has a wrong amount of upper points."
+        )
 
     @property_immutable_cache
     def protoss_wall_pylon(self) -> Optional[Point2]:
@@ -174,7 +210,9 @@ class Ramp:
         if len(self.upper) not in {2, 5}:
             return None
         if len(self.upper2_for_ramp_wall) != 2:
-            raise Exception("Not implemented. Trying to access a ramp that has a wrong amount of upper points.")
+            raise Exception(
+                "Not implemented. Trying to access a ramp that has a wrong amount of upper points."
+            )
         middle = self.depot_in_middle
         # direction up the ramp
         direction = self.barracks_in_middle.negative_offset(middle)
@@ -194,12 +232,17 @@ class Ramp:
             direction = self.barracks_in_middle.negative_offset(middle)
             # sort depots based on distance to start to get wallin orientation
             sorted_depots = sorted(
-                self.corner_depots, key=lambda depot: depot.distance_to(self.__game_info.player_start_location)
+                self.corner_depots,
+                key=lambda depot: depot.distance_to(
+                    self.__game_info.player_start_location
+                ),
             )
             wall1 = sorted_depots[1].offset(direction)
             wall2 = middle + direction + (middle - wall1) / 1.5
             return [wall1, wall2]
-        raise Exception("Not implemented. Trying to access a ramp that has a wrong amount of upper points.")
+        raise Exception(
+            "Not implemented. Trying to access a ramp that has a wrong amount of upper points."
+        )
 
     @property_immutable_cache
     def protoss_wall_warpin(self) -> Optional[Point2]:
@@ -210,38 +253,58 @@ class Ramp:
         if len(self.upper) not in {2, 5}:
             return None
         if len(self.upper2_for_ramp_wall) != 2:
-            raise Exception("Not implemented. Trying to access a ramp that has a wrong amount of upper points.")
+            raise Exception(
+                "Not implemented. Trying to access a ramp that has a wrong amount of upper points."
+            )
         middle = self.depot_in_middle
         # direction up the ramp
         direction = self.barracks_in_middle.negative_offset(middle)
         # sort depots based on distance to start to get wallin orientation
-        sorted_depots = sorted(self.corner_depots, key=lambda x: x.distance_to(self.__game_info.player_start_location))
+        sorted_depots = sorted(
+            self.corner_depots,
+            key=lambda x: x.distance_to(self.__game_info.player_start_location),
+        )
         return sorted_depots[0].negative_offset(direction)
 
 
 class GameInfo:
     def __init__(self, proto):
         self._proto = proto
-        self.players: List[Player] = [Player.from_proto(p) for p in self._proto.player_info]
+        self.players: List[Player] = [
+            Player.from_proto(p) for p in self._proto.player_info
+        ]
         self.map_name: str = self._proto.map_name
         self.local_map_path: str = self._proto.local_map_path
         self.map_size: Size = Size.from_proto(self._proto.start_raw.map_size)
 
         # self.pathing_grid[point]: if 0, point is not pathable, if 1, point is pathable
-        self.pathing_grid: PixelMap = PixelMap(self._proto.start_raw.pathing_grid, in_bits=True, mirrored=False)
+        self.pathing_grid: PixelMap = PixelMap(
+            self._proto.start_raw.pathing_grid, in_bits=True, mirrored=False
+        )
         # self.terrain_height[point]: returns the height in range of 0 to 255 at that point
-        self.terrain_height: PixelMap = PixelMap(self._proto.start_raw.terrain_height, mirrored=False)
+        self.terrain_height: PixelMap = PixelMap(
+            self._proto.start_raw.terrain_height, mirrored=False
+        )
         # self.placement_grid[point]: if 0, point is not placeable, if 1, point is pathable
-        self.placement_grid: PixelMap = PixelMap(self._proto.start_raw.placement_grid, in_bits=True, mirrored=False)
+        self.placement_grid: PixelMap = PixelMap(
+            self._proto.start_raw.placement_grid, in_bits=True, mirrored=False
+        )
         self.playable_area = Rect.from_proto(self._proto.start_raw.playable_area)
         self.map_center = self.playable_area.center
         self.map_ramps: List[Ramp] = None  # Filled later by BotAI._prepare_first_step
-        self.vision_blockers: Set[Point2] = None  # Filled later by BotAI._prepare_first_step
+        self.vision_blockers: Set[
+            Point2
+        ] = None  # Filled later by BotAI._prepare_first_step
         self.player_races: Dict[int, Race] = {
-            p.player_id: p.race_actual or p.race_requested for p in self._proto.player_info
+            p.player_id: p.race_actual or p.race_requested
+            for p in self._proto.player_info
         }
-        self.start_locations: List[Point2] = [Point2.from_proto(sl) for sl in self._proto.start_raw.start_locations]
-        self.player_start_location: Point2 = None  # Filled later by BotAI._prepare_first_step
+        self.start_locations: List[Point2] = [
+            Point2.from_proto(sl) for sl in self._proto.start_raw.start_locations
+        ]
+        self.player_start_location: Point2 = (
+            None  # Filled later by BotAI._prepare_first_step
+        )
 
     def _find_ramps_and_vision_blockers(self) -> Tuple[List[Ramp], Set[Point2]]:
         """Calculate points that are pathable but not placeable.
@@ -250,7 +313,9 @@ class GameInfo:
 
         def equal_height_around(tile):
             # mask to slice array 1 around tile
-            sliced = self.terrain_height.data_numpy[tile[1] - 1 : tile[1] + 2, tile[0] - 1 : tile[0] + 2]
+            sliced = self.terrain_height.data_numpy[
+                tile[1] - 1 : tile[1] + 2, tile[0] - 1 : tile[0] + 2
+            ]
             return len(np.unique(sliced)) == 1
 
         map_area = self.playable_area
@@ -280,7 +345,9 @@ class GameInfo:
         map_width = self.pathing_grid.width
         map_height = self.pathing_grid.height
         currentColor: int = NOT_COLORED_YET
-        picture: List[List[int]] = [[-2 for _ in range(map_width)] for _ in range(map_height)]
+        picture: List[List[int]] = [
+            [-2 for _ in range(map_width)] for _ in range(map_height)
+        ]
 
         def paint(pt: Point2) -> None:
             picture[pt.y][pt.x] = currentColor

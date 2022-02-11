@@ -174,10 +174,20 @@ IS_VISIBLE = DisplayType.Visible.value
 IS_PLACEHOLDER = DisplayType.Placeholder.value
 IS_MINE = Alliance.Self.value
 IS_ENEMY = Alliance.Enemy.value
-IS_CLOAKED: Set[int] = {CloakState.Cloaked.value, CloakState.CloakedDetected.value, CloakState.CloakedAllied.value}
+IS_CLOAKED: Set[int] = {
+    CloakState.Cloaked.value,
+    CloakState.CloakedDetected.value,
+    CloakState.CloakedAllied.value,
+}
 IS_REVEALED: Set[int] = CloakState.CloakedDetected.value
-CAN_BE_ATTACKED: Set[int] = {CloakState.NotCloaked.value, CloakState.CloakedDetected.value}
-IS_CARRYING_MINERALS: Set[BuffId] = {BuffId.CARRYMINERALFIELDMINERALS, BuffId.CARRYHIGHYIELDMINERALFIELDMINERALS}
+CAN_BE_ATTACKED: Set[int] = {
+    CloakState.NotCloaked.value,
+    CloakState.CloakedDetected.value,
+}
+IS_CARRYING_MINERALS: Set[BuffId] = {
+    BuffId.CARRYMINERALFIELDMINERALS,
+    BuffId.CARRYHIGHYIELDMINERALFIELDMINERALS,
+}
 IS_CARRYING_VESPENE: Set[BuffId] = {
     BuffId.CARRYHARVESTABLEVESPENEGEYSERGAS,
     BuffId.CARRYHARVESTABLEVESPENEGEYSERGASPROTOSS,
@@ -210,7 +220,11 @@ IS_CONSTRUCTING_SCV: Set[AbilityId] = {
     AbilityId.TERRANBUILD_STARPORT,
     AbilityId.TERRANBUILD_SUPPLYDEPOT,
 }
-IS_REPAIRING: Set[AbilityId] = {AbilityId.EFFECT_REPAIR, AbilityId.EFFECT_REPAIR_MULE, AbilityId.EFFECT_REPAIR_SCV}
+IS_REPAIRING: Set[AbilityId] = {
+    AbilityId.EFFECT_REPAIR,
+    AbilityId.EFFECT_REPAIR_MULE,
+    AbilityId.EFFECT_REPAIR_SCV,
+}
 IS_DETECTOR: Set[UnitTypeId] = {
     UnitTypeId.OBSERVER,
     UnitTypeId.OBSERVERSIEGEMODE,
@@ -527,7 +541,10 @@ DAMAGE_BONUS_PER_UPGRADE: Dict[int, UnitTypeId] = {
     UnitTypeId.COLOSSUS: {TargetType.Ground.value: {IS_LIGHT: 1}},
     # Stargate Units
     UnitTypeId.ORACLE: {TargetType.Ground.value: {None: 0}},
-    UnitTypeId.TEMPEST: {TargetType.Ground.value: {None: 4}, TargetType.Air.value: {None: 3, IS_MASSIVE: 2}},
+    UnitTypeId.TEMPEST: {
+        TargetType.Ground.value: {None: 4},
+        TargetType.Air.value: {None: 3, IS_MASSIVE: 2},
+    },
     #
     # Terran
     #
@@ -541,8 +558,14 @@ DAMAGE_BONUS_PER_UPGRADE: Dict[int, UnitTypeId] = {
     UnitTypeId.CYCLONE: {TargetType.Any.value: {None: 2}},
     UnitTypeId.SIEGETANK: {TargetType.Ground.value: {None: 2, IS_ARMORED: 1}},
     UnitTypeId.SIEGETANKSIEGED: {TargetType.Ground.value: {None: 4, IS_ARMORED: 1}},
-    UnitTypeId.THOR: {TargetType.Ground.value: {None: 3}, TargetType.Air.value: {IS_LIGHT: 1}},
-    UnitTypeId.THORAP: {TargetType.Ground.value: {None: 3}, TargetType.Air.value: {None: 3, IS_MASSIVE: 1}},
+    UnitTypeId.THOR: {
+        TargetType.Ground.value: {None: 3},
+        TargetType.Air.value: {IS_LIGHT: 1},
+    },
+    UnitTypeId.THORAP: {
+        TargetType.Ground.value: {None: 3},
+        TargetType.Air.value: {None: 3, IS_MASSIVE: 1},
+    },
     # Starport Units
     UnitTypeId.VIKINGASSAULT: {TargetType.Ground.value: {IS_MECHANICAL: 1}},
     UnitTypeId.LIBERATORAG: {TargetType.Ground.value: {None: 5}},
@@ -551,7 +574,9 @@ DAMAGE_BONUS_PER_UPGRADE: Dict[int, UnitTypeId] = {
     #
     UnitTypeId.DRONE: {TargetType.Ground.value: {None: 0}},
     # Hatch Tech Units (Queen, Ling, Bane, Roach, Ravager)
-    UnitTypeId.BANELING: {TargetType.Ground.value: {None: 2, IS_LIGHT: 2, IS_STRUCTURE: 3}},
+    UnitTypeId.BANELING: {
+        TargetType.Ground.value: {None: 2, IS_LIGHT: 2, IS_STRUCTURE: 3}
+    },
     UnitTypeId.ROACH: {TargetType.Ground.value: {None: 2}},
     UnitTypeId.RAVAGER: {TargetType.Ground.value: {None: 2}},
     # Lair Tech Units (Hydra, Lurker, Ultra)

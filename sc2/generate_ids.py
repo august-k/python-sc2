@@ -15,7 +15,12 @@ except ImportError:
 
 
 class IdGenerator:
-    def __init__(self, game_data: GameData = None, game_version: str = None, verbose: bool = False):
+    def __init__(
+        self,
+        game_data: GameData = None,
+        game_version: str = None,
+        verbose: bool = False,
+    ):
         self.game_data: GameData = game_data
         self.game_version = game_version
         self.verbose = verbose
@@ -26,7 +31,8 @@ class IdGenerator:
 
         self.HOME_DIR = str(Path.home())
         self.DATA_JSON = {
-            "Darwin": self.HOME_DIR + "/Library/Application Support/Blizzard/StarCraft II/stableid.json",
+            "Darwin": self.HOME_DIR
+            + "/Library/Application Support/Blizzard/StarCraft II/stableid.json",
             "Windows": self.HOME_DIR + "/Documents/StarCraft II/stableid.json",
             "Linux": self.HOME_DIR + "/Documents/StarCraft II/stableid.json",
         }
@@ -88,7 +94,9 @@ class IdGenerator:
                 key = "_" + key
 
             if key in abilities and v["index"] == 0:
-                print(f"{key} has value 0 and id {v['id']}, overwriting {key}: {abilities[key]}")
+                print(
+                    f"{key} has value 0 and id {v['id']}, overwriting {key}: {abilities[key]}"
+                )
                 # Commented out to try to fix: 3670 is not a valid AbilityId
                 abilities[key] = v["id"]
             elif key in abilities:
@@ -134,7 +142,9 @@ class IdGenerator:
         idsdir.mkdir(exist_ok=True)
 
         with (idsdir / "__init__.py").open("w") as f:
-            initstring = f"__all__ = {[n.lower() for n in self.FILE_TRANSLATE.values()] !r}\n".replace("'", '"')
+            initstring = f"__all__ = {[n.lower() for n in self.FILE_TRANSLATE.values()] !r}\n".replace(
+                "'", '"'
+            )
             f.write("\n".join([self.HEADER, initstring]))
 
         for name, body in enums.items():
@@ -146,7 +156,11 @@ class IdGenerator:
                 code.append(f"    {key} = {value}")
 
             # Add repr function to more easily dump enums to dict
-            code += ["\n", "    def __repr__(self):", '        return f"' + class_name + '.{self.name}"']
+            code += [
+                "\n",
+                "    def __repr__(self):",
+                '        return f"' + class_name + '.{self.name}"',
+            ]
 
             code += [
                 "\n",
@@ -174,8 +188,16 @@ class IdGenerator:
                 f.write(f'ID_VERSION_STRING = "{self.game_version}"\n')
 
     def update_ids_from_stableid_json(self):
-        if self.game_version is None or ID_VERSION_STRING is None or ID_VERSION_STRING != self.game_version:
-            if self.verbose and self.game_version is not None and ID_VERSION_STRING is not None:
+        if (
+            self.game_version is None
+            or ID_VERSION_STRING is None
+            or ID_VERSION_STRING != self.game_version
+        ):
+            if (
+                self.verbose
+                and self.game_version is not None
+                and ID_VERSION_STRING is not None
+            ):
                 logger.info(
                     f"Game version is different (Old: {self.game_version}, new: {ID_VERSION_STRING}. Updating ids to match game version"
                 )
@@ -220,15 +242,22 @@ class IdGenerator:
 
         ids = set(a.value for a in AbilityId if a.value != 0)
         self.game_data.abilities = {
-            a.ability_id: AbilityData(self.game_data, a) for a in self.game_data._proto.abilities if a.ability_id in ids
+            a.ability_id: AbilityData(self.game_data, a)
+            for a in self.game_data._proto.abilities
+            if a.ability_id in ids
         }
         # self.game_data.abilities = {
         #     a.ability_id: AbilityData(self.game_data, a) for a in self.game_data._proto.abilities
         # }
         self.game_data.units = {
-            u.unit_id: UnitTypeData(self.game_data, u) for u in self.game_data._proto.units if u.available
+            u.unit_id: UnitTypeData(self.game_data, u)
+            for u in self.game_data._proto.units
+            if u.available
         }
-        self.game_data.upgrades = {u.upgrade_id: UpgradeData(self.game_data, u) for u in self.game_data._proto.upgrades}
+        self.game_data.upgrades = {
+            u.upgrade_id: UpgradeData(self.game_data, u)
+            for u in self.game_data._proto.upgrades
+        }
         self.game_data.unit_types = {}
 
 

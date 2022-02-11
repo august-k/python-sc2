@@ -13,7 +13,13 @@ if TYPE_CHECKING:
 
 
 class UnitCommand:
-    def __init__(self, ability: AbilityId, unit: Unit, target: Union[Unit, Point2] = None, queue: bool = False):
+    def __init__(
+        self,
+        ability: AbilityId,
+        unit: Unit,
+        target: Union[Unit, Point2] = None,
+        queue: bool = False,
+    ):
         """
         :param ability:
         :param unit:
@@ -21,7 +27,9 @@ class UnitCommand:
         :param queue:
         """
         assert ability in AbilityId, f"ability {ability} is not in AbilityId"
-        assert isinstance(unit, unit_module.Unit), f"unit {unit} is of type {type(unit)}"
+        assert isinstance(
+            unit, unit_module.Unit
+        ), f"unit {unit} is of type {type(unit)}"
         assert target is None or isinstance(
             target, (Point2, unit_module.Unit)
         ), f"target {target} is of type {type(target)}"
@@ -33,7 +41,12 @@ class UnitCommand:
 
     @property
     def combining_tuple(self):
-        return self.ability, self.target, self.queue, self.ability in COMBINEABLE_ABILITIES
+        return (
+            self.ability,
+            self.target,
+            self.queue,
+            self.ability in COMBINEABLE_ABILITIES,
+        )
 
     def __repr__(self):
         return f"UnitCommand({self.ability}, {self.unit}, {self.target}, {self.queue})"

@@ -64,7 +64,7 @@ def property_cache_once_per_frame_no_copy(f):
 
 
 def property_immutable_cache(f):
-    """ This cache should only be used on properties that return an immutable object (bool, str, int, float, tuple, Unit, Point2, Point3) """
+    """This cache should only be used on properties that return an immutable object (bool, str, int, float, tuple, Unit, Point2, Point3)"""
 
     @wraps(f)
     def inner(self):
@@ -76,7 +76,7 @@ def property_immutable_cache(f):
 
 
 def property_mutable_cache(f):
-    """ This cache should only be used on properties that return a mutable object (Units, list, set, dict, Counter) """
+    """This cache should only be used on properties that return a mutable object (Units, list, set, dict, Counter)"""
 
     @wraps(f)
     def inner(self):

@@ -44,8 +44,12 @@ class Renderer:
             self._window.on_mouse_press = self._on_mouse_press
             self._window.on_mouse_release = self._on_mouse_release
             self._window.on_mouse_drag = self._on_mouse_drag
-            self._map_image = ImageData(map_width, map_height, "RGB", map_data, map_pitch)
-            self._minimap_image = ImageData(minimap_width, minimap_height, "RGB", minimap_data, minimap_pitch)
+            self._map_image = ImageData(
+                map_width, map_height, "RGB", map_data, map_pitch
+            )
+            self._minimap_image = ImageData(
+                minimap_width, minimap_height, "RGB", minimap_data, minimap_pitch
+            )
             self._text_supply = Label(
                 "",
                 font_name="Arial",
@@ -99,23 +103,41 @@ class Renderer:
         else:
             self._map_image.set_data("RGB", map_pitch, map_data)
             self._minimap_image.set_data("RGB", minimap_pitch, minimap_data)
-            self._text_time.text = str(datetime.timedelta(seconds=(observation.observation.game_loop * 0.725) // 16))
+            self._text_time.text = str(
+                datetime.timedelta(
+                    seconds=(observation.observation.game_loop * 0.725) // 16
+                )
+            )
             if observation.observation.HasField("player_common"):
                 self._text_supply.text = "{} / {}".format(
-                    observation.observation.player_common.food_used, observation.observation.player_common.food_cap
+                    observation.observation.player_common.food_used,
+                    observation.observation.player_common.food_cap,
                 )
-                self._text_vespene.text = str(observation.observation.player_common.vespene)
-                self._text_minerals.text = str(observation.observation.player_common.minerals)
+                self._text_vespene.text = str(
+                    observation.observation.player_common.vespene
+                )
+                self._text_minerals.text = str(
+                    observation.observation.player_common.minerals
+                )
             if observation.observation.HasField("score"):
                 self._text_score.text = "{} score: {}".format(
-                    score_pb._SCORE_SCORETYPE.values_by_number[observation.observation.score.score_type].name,
+                    score_pb._SCORE_SCORETYPE.values_by_number[
+                        observation.observation.score.score_type
+                    ].name,
                     observation.observation.score.score,
                 )
 
         await self._update_window()
 
-        if self._client.in_game and (not observation.player_result) and self._mouse_x and self._mouse_y:
-            await self._client.move_camera_spatial(Point2((self._mouse_x, self._minimap_size[0] - self._mouse_y)))
+        if (
+            self._client.in_game
+            and (not observation.player_result)
+            and self._mouse_x
+            and self._mouse_y
+        ):
+            await self._client.move_camera_spatial(
+                Point2((self._mouse_x, self._minimap_size[0] - self._mouse_y))
+            )
             self._mouse_x, self._mouse_y = None, None
 
     async def _update_window(self):
