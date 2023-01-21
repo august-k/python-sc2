@@ -75,6 +75,7 @@ class BotAIInternal(ABC):
         self.larva: Units = Units([], self)
         self.structures: Units = Units([], self)
         self.townhalls: Units = Units([], self)
+        self.ready_townhalls: Units = Units([], self)
         self.gas_buildings: Units = Units([], self)
         self.all_own_units: Units = Units([], self)
         self.enemy_units: Units = Units([], self)
@@ -527,6 +528,7 @@ class BotAIInternal(ABC):
         self.larva: Units = Units([], self)
         self.structures: Units = Units([], self)
         self.townhalls: Units = Units([], self)
+        self.ready_townhalls: Units = Units([], self)
         self.gas_buildings: Units = Units([], self)
         self.all_own_units: Units = Units([], self)
         self.enemy_units: Units = Units([], self)
@@ -584,6 +586,8 @@ class BotAIInternal(ABC):
                         self.structures.append(unit_obj)
                         if unit_id in race_townhalls[self.race]:
                             self.townhalls.append(unit_obj)
+                            if unit_obj.is_ready:
+                                self.ready_townhalls.append(unit_obj)
                         elif unit_id in ALL_GAS or unit_obj.vespene_contents:
                             # TODO: remove "or unit_obj.vespene_contents" when a new linux client newer than version 4.10.0 is released
                             self.gas_buildings.append(unit_obj)
