@@ -212,6 +212,8 @@ class BotAIInternal(ABC):
         for resources in resource_groups:
             # Possible expansion points
             amount = len(resources)
+            # fix for Automaton 2000
+            mineral_distance_check = 6.27 if amount <= 5 else 6.0
             # Calculate center, round and add 0.5 because expansion location will have (x.5, y.5)
             # coordinates because bases have size 5.
             center_x = int(sum(resource.position.x for resource in resources) / amount) + 0.5
