@@ -124,8 +124,7 @@ class Unit:
         self.base_build = base_build
         # Index used in the 2D numpy array to access the 2D distance between two units
         self.distance_calculation_index: int = distance_calculation_index
-        # blank space for unit role in Eris
-        self.role: Any = None
+        self._tag = proto_data.tag
 
     def __repr__(self) -> str:
         """Returns string of this form: Unit(name='SCV', tag=4396941328)."""
@@ -160,7 +159,7 @@ class Unit:
     @property
     def tag(self) -> int:
         """Returns the unique tag of the unit."""
-        return self._proto.tag
+        return self.tag
 
     @property
     def is_structure(self) -> bool:
