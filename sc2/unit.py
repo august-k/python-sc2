@@ -159,7 +159,7 @@ class Unit:
     @property
     def tag(self) -> int:
         """Returns the unique tag of the unit."""
-        return self.tag
+        return self._tag
 
     @property
     def is_structure(self) -> bool:
