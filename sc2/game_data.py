@@ -1,46 +1,48 @@
+# pylint: disable=W0212
 from __future__ import annotations
-from bisect import bisect_left
-from functools import lru_cache
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, TYPE_CHECKING
 
-from .constants import ZERGLING
-from .data import Attribute, Race
-from .ids.ability_id import AbilityId
-from .ids.unit_typeid import UnitTypeId
-from .unit_command import UnitCommand
+from bisect import bisect_left
+from contextlib import suppress
+from dataclasses import dataclass
+from functools import lru_cache
+from typing import Dict, List, Optional, Union
+
+from sc2.data import Attribute, Race
+from sc2.ids.ability_id import AbilityId
+from sc2.ids.unit_typeid import UnitTypeId
+from sc2.unit_command import UnitCommand
+
+with suppress(ImportError):
+    from sc2.dicts.unit_trained_from import UNIT_TRAINED_FROM
 
 # Set of parts of names of abilities that have no cost
 # E.g every ability that has 'Hold' in its name is free
-# TODO move to constants, add more?
 FREE_ABILITIES = {"Lower", "Raise", "Land", "Lift", "Hold", "Harvest"}
 
 
 class GameData:
+
     def __init__(self, data):
         """
         :param data:
         """
         ids = set(a.value for a in AbilityId if a.value != 0)
-        self.abilities = {
+        self.abilities: Dict[int, AbilityData] = {
             a.ability_id: AbilityData(self, a)
-            for a in data.abilities
-            if a.ability_id in ids
+            for a in data.abilities if a.ability_id in ids
         }
-        self.units = {
-            u.unit_id: UnitTypeData(self, u) for u in data.units if u.available
-        }
-        self.upgrades = {u.upgrade_id: UpgradeData(self, u) for u in data.upgrades}
+        self.units: Dict[int, UnitTypeData] = {u.unit_id: UnitTypeData(self, u) for u in data.units if u.available}
+        self.upgrades: Dict[int, UpgradeData] = {u.upgrade_id: UpgradeData(self, u) for u in data.upgrades}
         # Cached UnitTypeIds so that conversion does not take long. This needs to be moved elsewhere if a new GameData object is created multiple times per game
-        self.unit_types: Dict[int, UnitTypeId] = {}
 
     @lru_cache(maxsize=256)
-    def calculate_ability_cost(self, ability) -> Cost:
+    def calculate_ability_cost(self, ability: Union[AbilityData, AbilityId, UnitCommand]) -> Cost:
         if isinstance(ability, AbilityId):
             ability = self.abilities[ability.value]
         elif isinstance(ability, UnitCommand):
             ability = self.abilities[ability.ability.value]
 
-        assert isinstance(ability, AbilityData), f"C: {ability}"
+        assert isinstance(ability, AbilityData), f"Ability is not of type 'AbilityData', but was {type(ability)}"
 
         for unit in self.units.values():
             if unit.creation_ability is None:
@@ -53,7 +55,7 @@ class GameData:
                 continue
 
             if unit.creation_ability == ability:
-                if unit.id == ZERGLING:
+                if unit.id == UnitTypeId.ZERGLING:
                     # HARD CODED: zerglings are generated in pairs
                     return Cost(
                         unit.cost.minerals * 2, unit.cost.vespene * 2, unit.cost.time
@@ -125,9 +127,7 @@ class AbilityData:
 
     @property
     def is_free_morph(self) -> bool:
-        if any(free in self._proto.link_name for free in FREE_ABILITIES):
-            return True
-        return False
+        return any(free in self._proto.link_name for free in FREE_ABILITIES)
 
     @property
     def cost(self) -> Cost:
@@ -135,6 +135,7 @@ class AbilityData:
 
 
 class UnitTypeData:
+
     def __init__(self, game_data: GameData, proto):
         """
         :param game_data:
@@ -242,20 +243,28 @@ class UnitTypeData:
     def cost_zerg_corrected(self) -> Cost:
         """This returns 25 for extractor and 200 for spawning pool instead of 75 and 250 respectively"""
         if self.race == Race.Zerg and Attribute.Structure.value in self.attributes:
-            # a = self._game_data.units(UnitTypeId.ZERGLING)
-            # print(a)
-            # print(vars(a))
-            return Cost(
-                self._proto.mineral_cost - 50,
-                self._proto.vespene_cost,
-                self._proto.build_time,
-            )
-        else:
-            return self.cost
+            return Cost(self._proto.mineral_cost - 50, self._proto.vespene_cost, self._proto.build_time)
+        return self.cost
 
     @property
     def morph_cost(self) -> Optional[Cost]:
-        """This returns 150 minerals for OrbitalCommand instead of 550"""
+        """ This returns 150 minerals for OrbitalCommand instead of 550 """
+        # Morphing units
+        supply_cost = self._proto.food_required
+        if supply_cost > 0 and self.id in UNIT_TRAINED_FROM and len(UNIT_TRAINED_FROM[self.id]) == 1:
+            producer: UnitTypeId
+            for producer in UNIT_TRAINED_FROM[self.id]:
+                producer_unit_data = self._game_data.units[producer.value]
+                if 0 < producer_unit_data._proto.food_required <= supply_cost:
+                    if producer == UnitTypeId.ZERGLING:
+                        producer_cost = Cost(25, 0)
+                    else:
+                        producer_cost = self._game_data.calculate_ability_cost(producer_unit_data.creation_ability)
+                    return Cost(
+                        self._proto.mineral_cost - producer_cost.minerals,
+                        self._proto.vespene_cost - producer_cost.vespene,
+                        self._proto.build_time,
+                    )
         # Fix for BARRACKSREACTOR which has tech alias [REACTOR] which has (0, 0) cost
         if self.tech_alias is None or self.tech_alias[0] in {
             UnitTypeId.TECHLAB,
@@ -279,6 +288,7 @@ class UnitTypeData:
 
 
 class UpgradeData:
+
     def __init__(self, game_data: GameData, proto):
         """
         :param game_data:
@@ -311,21 +321,15 @@ class UpgradeData:
         )
 
 
+@dataclass
 class Cost:
     """
     The cost of an action, a structure, a unit or a research upgrade.
     The time is given in frames (22.4 frames per game second).
     """
-
-    def __init__(self, minerals: int, vespene: int, time: float = None):
-        """
-        :param minerals:
-        :param vespene:
-        :param time:
-        """
-        self.minerals = minerals
-        self.vespene = vespene
-        self.time = time
+    minerals: int
+    vespene: int
+    time: Optional[float] = None
 
     def __repr__(self) -> str:
         return f"Cost({self.minerals}, {self.vespene})"
@@ -344,34 +348,15 @@ class Cost:
             return self
         if not self:
             return other
-        if self.time is None:
-            time = other.time
-        elif other.time is None:
-            time = self.time
-        else:
-            time = self.time + other.time
-        return self.__class__(
-            self.minerals + other.minerals, self.vespene + other.vespene, time=time
-        )
+        time = (self.time or 0) + (other.time or 0)
+        return Cost(self.minerals + other.minerals, self.vespene + other.vespene, time=time)
 
-    def __sub__(self, other) -> Cost:
-        assert isinstance(other, Cost)
-        if self.time is None:
-            time = other.time
-        elif other.time is None:
-            time = self.time
-        else:
-            time = self.time - other.time
-        return self.__class__(
-            self.minerals - other.minerals, self.vespene - other.vespene, time=time
-        )
+    def __sub__(self, other: Cost) -> Cost:
+        time = (self.time or 0) + (other.time or 0)
+        return Cost(self.minerals - other.minerals, self.vespene - other.vespene, time=time)
 
     def __mul__(self, other: int) -> Cost:
-        return self.__class__(
-            self.minerals * other, self.vespene * other, time=self.time
-        )
+        return Cost(self.minerals * other, self.vespene * other, time=self.time)
 
     def __rmul__(self, other: int) -> Cost:
-        return self.__class__(
-            self.minerals * other, self.vespene * other, time=self.time
-        )
+        return Cost(self.minerals * other, self.vespene * other, time=self.time)

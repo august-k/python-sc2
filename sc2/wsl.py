@@ -1,7 +1,9 @@
+# pylint: disable=R0911,W1510
 import os
-import subprocess
 import re
+import subprocess
 from pathlib import Path, PureWindowsPath
+
 from loguru import logger
 
 ## This file is used for compatibility with WSL and shouldn't need to be
@@ -76,15 +78,17 @@ def kill(wsl_process):
 
 def detect():
     """Detect the current running version of WSL, and bail out if it doesn't exist"""
+    # Allow disabling WSL detection with an environment variable
+    if os.getenv("SC2_WSL_DETECT", "1") == "0":
+        return None
+
     wsl_name = os.environ.get("WSL_DISTRO_NAME")
     if not wsl_name:
         return None
 
     try:
-        wsl_proc = subprocess.run(
-            ["wsl.exe", "--list", "--running", "--verbose"], capture_output=True
-        )
-    except Exception:
+        wsl_proc = subprocess.run(["wsl.exe", "--list", "--running", "--verbose"], capture_output=True)
+    except (OSError, ValueError):
         return None
     if wsl_proc.returncode != 0:
         return None
