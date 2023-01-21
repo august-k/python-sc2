@@ -101,6 +101,7 @@ class UnitOrder:
         return f"UnitOrder({self.ability}, {self.target}, {self.progress})"
 
 
+# pylint: disable=R0904
 class Unit:
     class_cache = CacheDict()
 
@@ -601,6 +602,7 @@ class Unit:
             )
         return False
 
+    # pylint: disable=R0912,R0911
     def calculate_damage_vs_target(
         self,
         target: Unit,
@@ -1365,7 +1367,7 @@ class Unit:
             can_afford_check=can_afford_check,
         )
 
-    def attack(self, target: Unit | Point2, queue: bool = False) -> UnitCommand | bool:
+    def attack(self, target: Union[Unit, Point2], queue: bool = False) -> Union[UnitCommand, bool]:
         """Orders unit to attack. Target can be a Unit or Point2.
         Attacking a position will make the unit move there and attack everything on its way.
 
