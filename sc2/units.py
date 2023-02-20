@@ -30,12 +30,15 @@ class Units(list):
         super().__init__(units)
         self._bot_object = bot_object
 
-    def __call__(self, unit_types: Union[UnitTypeId, Iterable[UnitTypeId]]) -> Units:
+    def __call__(self, unit_types: Optional[Union[UnitTypeId, Iterable[UnitTypeId]]] = None) -> Units:
         """Creates a new mutable Units object from Units or list object.
 
         :param unit_types:
         """
-        return self.of_type(unit_types)
+        if unit_types:
+            return self.of_type(unit_types)
+        else:
+            return self
 
     def __iter__(self) -> Generator[Unit, None, None]:
         return (item for item in super().__iter__())
