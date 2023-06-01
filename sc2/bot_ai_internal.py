@@ -517,7 +517,7 @@ class BotAIInternal(ABC):
 
         self._unit_abilities = await self.client.query_available_abilities_with_tag(
             self.all_own_units,
-            ignore_resource_requirements=True,
+            ignore_resource_requirements=False,
         )
 
         self._time_before_step: float = time.perf_counter()
