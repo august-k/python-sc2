@@ -613,14 +613,10 @@ class Unit:
                     # Automatically subtract 25 from self.minerals and 75 from self.vespene in this loop
                     roach.train(UnitTypeId.RAVAGER)
         """
-        if not self.is_mine:
-            warnings.warn(
-                f"Abilities are known only for your own units, but tried to get abilities for {self}.",
-                RuntimeWarning,
-                stacklevel=1,
-            )
-            return set()
-        return self._bot_object._unit_abilities[self.tag]
+        if self.tag in self._bot_object._unit_abilities:
+            return self._bot_object._unit_abilities[self.tag]
+
+        return set()
 
     def in_ability_cast_range(
         self,
