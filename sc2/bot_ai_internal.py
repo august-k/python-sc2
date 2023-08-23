@@ -429,7 +429,7 @@ class BotAIInternal(ABC):
         # prevent move command if unit is already at target position
         with suppress(AttributeError):
             # moving to a position
-            if action.ability == AbilityId.MOVE_MOVE and hasattr(action.target, "x"):
+            if action.ability in {AbilityId.MOVE_MOVE, AbilityId.ATTACK}  and hasattr(action.target, "x"):
                 if round(action.target[0]) == round(action.unit.position[0]) and round(
                     action.target[1]
                 ) == round(action.unit.position[1]):
