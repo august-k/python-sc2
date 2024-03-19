@@ -186,15 +186,15 @@ RESEARCH_INFO: Dict[
         }
     },
     UnitTypeId.FACTORYTECHLAB: {
-        UpgradeId.CYCLONELOCKONDAMAGEUPGRADE: {
-            'ability': AbilityId.RESEARCH_CYCLONELOCKONDAMAGE
-        },
         UpgradeId.DRILLCLAWS: {
             'ability': AbilityId.RESEARCH_DRILLINGCLAWS,
             'required_building': UnitTypeId.ARMORY
         },
         UpgradeId.HIGHCAPACITYBARRELS: {
             'ability': AbilityId.RESEARCH_INFERNALPREIGNITER
+        },
+        UpgradeId.HURRICANETHRUSTERS: {
+            'ability': AbilityId.FACTORYTECHLABRESEARCH_CYCLONERESEARCHHURRICANETHRUSTERS
         },
         UpgradeId.SMARTSERVOS: {
             'ability': AbilityId.RESEARCH_SMARTSERVOS,
@@ -272,14 +272,11 @@ RESEARCH_INFO: Dict[
         UpgradeId.LIBERATORAGRANGEUPGRADE: {
             'ability': AbilityId.FUSIONCORERESEARCH_RESEARCHBALLISTICRANGE
         },
-        UpgradeId.MEDIVACINCREASESPEEDBOOST: {
-            'ability': AbilityId.FUSIONCORERESEARCH_RESEARCHRAPIDREIGNITIONSYSTEM
+        UpgradeId.MEDIVACCADUCEUSREACTOR: {
+            'ability': AbilityId.FUSIONCORERESEARCH_RESEARCHMEDIVACENERGYUPGRADE
         }
     },
     UnitTypeId.GHOSTACADEMY: {
-        UpgradeId.ENHANCEDSHOCKWAVES: {
-            'ability': AbilityId.GHOSTACADEMYRESEARCH_RESEARCHENHANCEDSHOCKWAVES
-        },
         UpgradeId.PERSONALCLOAKING: {
             'ability': AbilityId.RESEARCH_PERSONALCLOAKING
         }
@@ -337,9 +334,6 @@ RESEARCH_INFO: Dict[
         }
     },
     UnitTypeId.INFESTATIONPIT: {
-        UpgradeId.INFESTORENERGYUPGRADE: {
-            'ability': AbilityId.RESEARCH_PATHOGENGLANDS
-        },
         UpgradeId.NEURALPARASITE: {
             'ability': AbilityId.RESEARCH_NEURALPARASITE
         }
@@ -430,8 +424,8 @@ RESEARCH_INFO: Dict[
         UpgradeId.BANSHEESPEED: {
             'ability': AbilityId.RESEARCH_BANSHEEHYPERFLIGHTROTORS
         },
-        UpgradeId.RAVENCORVIDREACTOR: {
-            'ability': AbilityId.RESEARCH_RAVENCORVIDREACTOR
+        UpgradeId.INTERFERENCEMATRIX: {
+            'ability': AbilityId.STARPORTTECHLABRESEARCH_RESEARCHRAVENINTERFERENCEMATRIX
         }
     },
     UnitTypeId.TEMPLARARCHIVE: {

@@ -13,12 +13,11 @@ import math
 import pickle
 import random
 import sys
+import unittest
 from contextlib import suppress
 from pathlib import Path
 from typing import Any, List, Tuple
-from unittest.mock import patch
 
-import pytest
 from google.protobuf.internal import api_implementation
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -26,6 +25,7 @@ from loguru import logger
 
 from sc2.bot_ai import BotAI
 from sc2.client import Client
+from sc2.constants import ALL_GAS, CREATION_ABILITY_FIX
 from sc2.data import CloakState, Race
 from sc2.game_data import AbilityData, Cost, GameData
 from sc2.game_info import GameInfo
@@ -50,7 +50,7 @@ def load_map_pickle_data(map_path: Path) -> Tuple[Any, Any, Any]:
         return raw_game_data, raw_game_info, raw_observation
 
 
-async def build_bot_object_from_pickle_data(raw_game_data, raw_game_info, raw_observation) -> BotAI:
+def build_bot_object_from_pickle_data(raw_game_data, raw_game_info, raw_observation) -> BotAI:
     # Build fresh bot object, and load the pickled data into the bot object
     bot = BotAI()
     game_data = GameData(raw_game_data.data)
@@ -59,15 +59,14 @@ async def build_bot_object_from_pickle_data(raw_game_data, raw_game_info, raw_ob
     bot._initialize_variables()
     client = Client(True)
     bot._prepare_start(client=client, player_id=1, game_info=game_info, game_data=game_data)
-    with patch.object(Client, "query_available_abilities_with_tag", return_value={}):
-        await bot._prepare_step(state=game_state, proto_game_info=raw_game_info)
+    bot._prepare_step(state=game_state, proto_game_info=raw_game_info)
     return bot
 
 
-async def get_map_specific_bot(map_path: Path) -> BotAI:
+def get_map_specific_bot(map_path: Path) -> BotAI:
     assert map_path in MAPS
     data = load_map_pickle_data(map_path)
-    return await build_bot_object_from_pickle_data(*data)
+    return build_bot_object_from_pickle_data(*data)
 
 
 def test_protobuf_implementation():
@@ -77,9 +76,8 @@ def test_protobuf_implementation():
         assert api_implementation.Type() == "cpp"
 
 
-@pytest.mark.asyncio
-async def test_bot_ai():
-    bot: BotAI = await get_map_specific_bot(random.choice(MAPS))
+def test_bot_ai():
+    bot: BotAI = get_map_specific_bot(random.choice(MAPS))
     # Test initial bot attributes at game start
 
     # Properties from _prepare_start
@@ -411,9 +409,8 @@ async def test_bot_ai():
     assert bot.calculate_supply_cost(UnitTypeId.LURKERMP) == 1
 
 
-@pytest.mark.asyncio
-async def test_game_info():
-    bot: BotAI = await get_map_specific_bot(random.choice(MAPS))
+def test_game_info():
+    bot: BotAI = get_map_specific_bot(random.choice(MAPS))
     # Test if main base ramp works
     bot.game_info.map_ramps, bot.game_info.vision_blockers = bot.game_info._find_ramps_and_vision_blockers()
     game_info: GameInfo = bot.game_info
@@ -436,9 +433,8 @@ async def test_game_info():
     assert game_info.player_start_location
 
 
-@pytest.mark.asyncio
-async def test_game_data():
-    bot: BotAI = await get_map_specific_bot(random.choice(MAPS))
+def test_game_data():
+    bot: BotAI = get_map_specific_bot(random.choice(MAPS))
     game_data = bot.game_data
 
     assert game_data.abilities
@@ -478,9 +474,8 @@ async def test_game_data():
         assert isinstance(upgrade_data.cost, Cost)
 
 
-@pytest.mark.asyncio
-async def test_game_state():
-    bot: BotAI = await get_map_specific_bot(random.choice(MAPS))
+def test_game_state():
+    bot: BotAI = get_map_specific_bot(random.choice(MAPS))
     state = bot.state
 
     assert not state.actions
@@ -502,9 +497,8 @@ async def test_game_state():
     assert not state.effects
 
 
-@pytest.mark.asyncio
-async def test_pixelmap():
-    bot: BotAI = await get_map_specific_bot(random.choice(MAPS))
+def test_pixelmap():
+    bot: BotAI = get_map_specific_bot(random.choice(MAPS))
     pathing_grid: PixelMap = bot.game_info.pathing_grid
     assert pathing_grid.bits_per_pixel
     assert pathing_grid.bytes_per_pixel == pathing_grid.bits_per_pixel // 8
@@ -518,23 +512,20 @@ async def test_pixelmap():
     pathing_grid.print()
 
 
-@pytest.mark.asyncio
-async def test_blip():
-    bot: BotAI = await get_map_specific_bot(random.choice(MAPS))
+def test_blip():
+    bot: BotAI = get_map_specific_bot(random.choice(MAPS))
     # TODO this needs to be done in a test bot that has a sensor tower
     # blips are enemy dots on the minimap that are out of vision
 
 
-@pytest.mark.asyncio
-async def test_score():
-    bot: BotAI = await get_map_specific_bot(random.choice(MAPS))
+def test_score():
+    bot: BotAI = get_map_specific_bot(random.choice(MAPS))
     assert bot.state.score
     assert bot.state.score.summary
 
 
-@pytest.mark.asyncio
-async def test_unit():
-    bot: BotAI = await get_map_specific_bot(random.choice(MAPS))
+def test_unit():
+    bot: BotAI = get_map_specific_bot(random.choice(MAPS))
     scv: Unit = bot.workers.random
     townhall: Unit = bot.townhalls.first
 
@@ -803,9 +794,8 @@ async def test_unit():
     # assert marauder1.calculate_damage_vs_target(marauder_15_hp, include_overkill_damage=False)[0] == 15
 
 
-@pytest.mark.asyncio
-async def test_units():
-    bot: BotAI = await get_map_specific_bot(random.choice(MAPS))
+def test_units():
+    bot: BotAI = get_map_specific_bot(random.choice(MAPS))
     scvs = bot.workers
     townhalls = bot.townhalls
 
@@ -931,8 +921,62 @@ async def test_units():
     assert scvs.by_tag(scvs[0].tag)
 
 
-@pytest.mark.asyncio
-async def test_dicts():
+def test_exact_creation_ability():
+    try:
+        from sc2.dicts.unit_abilities import UNIT_ABILITIES
+        from sc2.dicts.unit_unit_alias import UNIT_UNIT_ALIAS
+    except ImportError:
+        logger.info(f"Import error: dict sc2/dicts/ are missing!")
+        return
+    test_case = unittest.TestCase()
+    bot: BotAI = get_map_specific_bot(random.choice(MAPS))
+
+    ignore_types = {
+        UnitTypeId.ADEPTPHASESHIFT,
+        UnitTypeId.ARBITERMP,
+        UnitTypeId.BROODLING,
+        UnitTypeId.BYPASSARMORDRONE,
+        UnitTypeId.CORSAIRMP,
+        UnitTypeId.EGG,
+        UnitTypeId.ELSECARO_COLONIST_HUT,
+        UnitTypeId.HERC,
+        UnitTypeId.HERCPLACEMENT,
+        UnitTypeId.INFESTEDTERRANSEGG,
+        UnitTypeId.LARVA,
+        UnitTypeId.NYDUSCANALCREEPER,
+        UnitTypeId.QUEENMP,
+        UnitTypeId.RAVENREPAIRDRONE,
+        UnitTypeId.REPLICANT,
+        UnitTypeId.SCOURGEMP,
+        UnitTypeId.SCOUTMP,
+        UnitTypeId.WARHOUND,
+    }
+
+    unit_types = list(UNIT_UNIT_ALIAS) + list(UNIT_UNIT_ALIAS.values()) + list(UNIT_ABILITIES) + list(ALL_GAS)
+    unit_types_unique_sorted = sorted(set(t.name for t in unit_types))
+    for unit_type_name in unit_types_unique_sorted:
+        unit_type = UnitTypeId[unit_type_name]
+        if unit_type in ignore_types:
+            continue
+
+        if unit_type in [
+            UnitTypeId.ARCHON,
+            UnitTypeId.ASSIMILATORRICH,
+            UnitTypeId.EXTRACTORRICH,
+            UnitTypeId.REFINERYRICH,
+        ]:
+            with test_case.assertRaises(AttributeError):
+                _creation_ability = bot.game_data.units[unit_type.value].creation_ability.exact_id
+            continue
+
+        try:
+            _creation_ability = bot.game_data.units[unit_type.value].creation_ability.exact_id
+        except AttributeError:
+            if unit_type not in CREATION_ABILITY_FIX:
+                assert False, f"Unit type '{unit_type}' missing from CREATION_ABILITY_FIX"
+
+
+def test_dicts():
     # May be missing but that should not fail the tests
     try:
         from sc2.dicts.unit_research_abilities import RESEARCH_INFO
@@ -940,7 +984,7 @@ async def test_dicts():
         logger.info(f"Import error: dict sc2/dicts/unit_research_abilities.py is missing!")
         return
 
-    bot: BotAI = await get_map_specific_bot(random.choice(MAPS))
+    bot: BotAI = get_map_specific_bot(random.choice(MAPS))
 
     unit_id: UnitTypeId
     data: dict

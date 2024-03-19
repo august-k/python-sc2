@@ -48,12 +48,6 @@ TRAIN_INFO: Dict[
             'required_building': UnitTypeId.GREATERSPIRE
         }
     },
-    UnitTypeId.CREEPTUMOR: {
-        UnitTypeId.CREEPTUMOR: {
-            'ability': AbilityId.BUILD_CREEPTUMOR_TUMOR,
-            'requires_placement_position': True
-        }
-    },
     UnitTypeId.CREEPTUMORBURROWED: {
         UnitTypeId.CREEPTUMOR: {
             'ability': AbilityId.BUILD_CREEPTUMOR,
@@ -137,8 +131,7 @@ TRAIN_INFO: Dict[
     },
     UnitTypeId.FACTORY: {
         UnitTypeId.CYCLONE: {
-            'ability': AbilityId.TRAIN_CYCLONE,
-            'requires_techlab': True
+            'ability': AbilityId.TRAIN_CYCLONE
         },
         UnitTypeId.HELLION: {
             'ability': AbilityId.FACTORYTRAIN_HELLION
@@ -608,7 +601,7 @@ TRAIN_INFO: Dict[
     },
     UnitTypeId.ZERGLING: {
         UnitTypeId.BANELING: {
-            'ability': AbilityId.MORPHZERGLINGTOBANELING_BANELING,
+            'ability': AbilityId.MORPHTOBANELING_BANELING,
             'required_building': UnitTypeId.BANELINGNEST
         }
     }
