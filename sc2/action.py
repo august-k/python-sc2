@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from itertools import groupby
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
-# pyre-ignore[21]
 from s2clientprotocol import raw_pb2 as raw_pb
 
 from sc2.position import Point2
@@ -14,6 +13,7 @@ if TYPE_CHECKING:
     from sc2.unit_command import UnitCommand
 
 
+# pylint: disable=R0912
 def combine_actions(action_iter):
     """
     Example input:
@@ -26,7 +26,7 @@ def combine_actions(action_iter):
     """
     for key, items in groupby(action_iter, key=lambda a: a.combining_tuple):
         ability: AbilityId
-        target: None | Point2 | Unit
+        target: Union[None, Point2, Unit]
         queue: bool
         # See constants.py for combineable abilities
         combineable: bool
@@ -35,7 +35,8 @@ def combine_actions(action_iter):
         if combineable:
             # Combine actions with no target, e.g. lift, burrowup, burrowdown, siege, unsiege, uproot spines
             cmd = raw_pb.ActionRawUnitCommand(
-                ability_id=ability.value, unit_tags={u.unit.tag for u in items}, queue_command=queue
+                ability_id=ability.value, unit_tags={u.unit.tag
+                                                     for u in items}, queue_command=queue
             )
             # Combine actions with target point, e.g. attack_move or move commands on a position
             if isinstance(target, Point2):
@@ -45,7 +46,9 @@ def combine_actions(action_iter):
             elif isinstance(target, Unit):
                 cmd.target_unit_tag = target.tag
             elif target is not None:
-                raise RuntimeError(f"Must target a unit, point or None, found '{target!r}'")
+                raise RuntimeError(
+                    f"Must target a unit, point or None, found '{target !r}'"
+                )
 
             yield raw_pb.ActionRaw(unit_command=cmd)
 
@@ -61,7 +64,9 @@ def combine_actions(action_iter):
             if target is None:
                 for u in items:
                     cmd = raw_pb.ActionRawUnitCommand(
-                        ability_id=ability.value, unit_tags={u.unit.tag}, queue_command=queue
+                        ability_id=ability.value,
+                        unit_tags={u.unit.tag},
+                        queue_command=queue,
                     )
                     yield raw_pb.ActionRaw(unit_command=cmd)
             elif isinstance(target, Point2):
@@ -84,4 +89,6 @@ def combine_actions(action_iter):
                     )
                     yield raw_pb.ActionRaw(unit_command=cmd)
             else:
-                raise RuntimeError(f"Must target a unit, point or None, found '{target!r}'")
+                raise RuntimeError(
+                    f"Must target a unit, point or None, found '{target !r}'"
+                )

@@ -1,10 +1,8 @@
-# pyre-ignore-all-errors[14, 15, 58]
 from __future__ import annotations
 
 from collections import OrderedDict
-from collections.abc import Iterable
 from threading import RLock
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterable, Union
 
 if TYPE_CHECKING:
     from sc2.bot_ai import BotAI
@@ -31,18 +29,17 @@ class ExpiringDict(OrderedDict):
                     print("test is not anymore in dict")
     """
 
-    def __init__(self, bot: BotAI, max_age_frames: int = 1) -> None:
+    def __init__(self, bot: BotAI, max_age_frames: int = 1):
         assert max_age_frames >= -1
         assert bot
 
         OrderedDict.__init__(self)
         self.bot: BotAI = bot
-        self.max_age: int | float = max_age_frames
+        self.max_age: Union[int, float] = max_age_frames
         self.lock: RLock = RLock()
 
     @property
     def frame(self) -> int:
-        # pyre-ignore[16]
         return self.bot.state.game_loop
 
     def __contains__(self, key) -> bool:
@@ -56,8 +53,8 @@ class ExpiringDict(OrderedDict):
                 del self[key]
         return False
 
-    def __getitem__(self, key, with_age: bool = False) -> Any:
-        """Return the item of the dict using d[key]"""
+    def __getitem__(self, key, with_age=False) -> Any:
+        """ Return the item of the dict using d[key] """
         with self.lock:
             # Each item is a list of [value, frame time]
             item = OrderedDict.__getitem__(self, key)
@@ -68,12 +65,12 @@ class ExpiringDict(OrderedDict):
             OrderedDict.__delitem__(self, key)
         raise KeyError(key)
 
-    def __setitem__(self, key, value) -> None:
+    def __setitem__(self, key, value):
         """Set d[key] = value"""
         with self.lock:
             OrderedDict.__setitem__(self, key, (value, self.frame))
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         """Printable version of the dict instead of getting memory adress"""
         print_list = []
         with self.lock:
@@ -92,7 +89,7 @@ class ExpiringDict(OrderedDict):
             return self.keys()
 
     # TODO find a way to improve len
-    def __len__(self) -> int:
+    def __len__(self):
         """Override len method as key value pairs aren't instantly being deleted, but only on __get__(item).
         This function is slow because it has to check if each element is not expired yet."""
         with self.lock:
@@ -101,7 +98,7 @@ class ExpiringDict(OrderedDict):
                 count += 1
             return count
 
-    def pop(self, key, default=None, with_age: bool = False):
+    def pop(self, key, default=None, with_age=False):
         """Return the item and remove it"""
         with self.lock:
             if OrderedDict.__contains__(self, key):
@@ -118,7 +115,7 @@ class ExpiringDict(OrderedDict):
                 return default, self.frame
             return default
 
-    def get(self, key, default=None, with_age: bool = False):
+    def get(self, key, default=None, with_age=False):
         """Return the value for key if key is in dict, else default"""
         with self.lock:
             if OrderedDict.__contains__(self, key):
@@ -134,7 +131,7 @@ class ExpiringDict(OrderedDict):
             return None
         return None
 
-    def update(self, other_dict: dict) -> None:
+    def update(self, other_dict: dict):
         with self.lock:
             for key, value in other_dict.items():
                 self[key] = value

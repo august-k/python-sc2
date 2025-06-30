@@ -206,6 +206,7 @@ GENERIC_REDIRECT_ABILITIES: dict[AbilityId, AbilityId] = {
     AbilityId.MORPHTOSWARMHOSTBURROWEDMP_CANCEL: AbilityId.CANCEL,
     AbilityId.MOVE_BATTLECRUISER: AbilityId.MOVE,
     AbilityId.MOVE_MOVE: AbilityId.MOVE,
+    AbilityId.NULL_NULL: AbilityId.CANCEL,
     AbilityId.PATROL_BATTLECRUISER: AbilityId.PATROL,
     AbilityId.PATROL_PATROL: AbilityId.PATROL,
     AbilityId.PHASINGMODE_CANCEL: AbilityId.CANCEL,

@@ -21,6 +21,7 @@ from sc2.constants import (
     ALL_GAS,
     IS_PLACEHOLDER,
     TERRAN_STRUCTURES_REQUIRE_SCV,
+    WORKER_TYPES,
     FakeEffectID,
     abilityid_to_unittypeid,
     geyser_ids,
@@ -213,6 +214,8 @@ class BotAIInternal(ABC):
         for resources in resource_groups:
             # Possible expansion points
             amount = len(resources)
+            # fix for Automaton 2000
+            mineral_distance_check = 6.27 if amount <= 5 else 6.0
             # Calculate center, round and add 0.5 because expansion location will have (x.5, y.5)
             # coordinates because bases have size 5.
             center_x = int(sum(resource.position.x for resource in resources) / amount) + 0.5
@@ -483,7 +486,7 @@ class BotAIInternal(ABC):
         self._time_before_step: float = time.perf_counter()
 
     @final
-    def _prepare_step(self, state, proto_game_info):
+    async def _prepare_step(self, state, proto_game_info):
         """
         :param state:
         :param proto_game_info:
@@ -554,8 +557,6 @@ class BotAIInternal(ABC):
         self.techlab_tags: Set[int] = set()
         self.reactor_tags: Set[int] = set()
 
-        worker_types: Set[UnitTypeId] = {UnitTypeId.DRONE, UnitTypeId.DRONEBURROWED, UnitTypeId.SCV, UnitTypeId.PROBE}
-
         index: int = 0
         for unit in self.state.observation_raw.units:
             if unit.is_blip:
@@ -616,7 +617,7 @@ class BotAIInternal(ABC):
                             self.reactor_tags.add(unit_obj.tag)
                     else:
                         self.units.append(unit_obj)
-                        if unit_id in worker_types:
+                        if unit_id in WORKER_TYPES:
                             self.workers.append(unit_obj)
                         elif unit_id == UnitTypeId.LARVA:
                             self.larva.append(unit_obj)

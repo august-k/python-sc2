@@ -109,11 +109,19 @@ def latest_executeble(versions_dir, base_build=None):
         with suppress(ValueError):
             latest = (
                 int(base_build[4:]),
-                max(p for p in versions_dir.iterdir() if p.is_dir() and p.name.startswith(str(base_build))),
+                max(
+                    p
+                    for p in versions_dir.iterdir()
+                    if p.is_dir() and p.name.startswith(str(base_build))
+                ),
             )
 
     if base_build is None or latest is None:
-        latest = max((int(p.name[4:]), p) for p in versions_dir.iterdir() if p.is_dir() and p.name.startswith("Base"))
+        latest = max(
+            (int(p.name[4:]), p)
+            for p in versions_dir.iterdir()
+            if p.is_dir() and p.name.startswith("Base")
+        )
 
     version, path = latest
 
