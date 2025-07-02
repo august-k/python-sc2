@@ -26,6 +26,7 @@ from sc2.constants import (
     abilityid_to_unittypeid,
     geyser_ids,
     mineral_ids,
+    CREATION_ABILITY_FIX,
 )
 from sc2.data import ActionResult, Race, race_townhalls
 from sc2.game_data import Cost, GameData
@@ -282,6 +283,38 @@ class BotAIInternal(ABC):
                     max_build_progress[creation_ability] = max(
                         max_build_progress.get(creation_ability, 0), unit.build_progress
                     )
+
+        return abilities_amount, max_build_progress
+
+    @final
+    @property_cache_once_per_frame
+    def _abilities_count_and_build_progress(self) -> tuple[Counter[AbilityId], dict[AbilityId, float]]:
+        """Cache for the already_pending function, includes protoss units warping in,
+        all units in production and all structures, and all morphs"""
+        abilities_amount: Counter[AbilityId] = Counter()
+        max_build_progress: dict[AbilityId, float] = {}
+        unit: Unit
+        for unit in self.units + self.structures:
+            for order in unit.orders:
+                abilities_amount[order.ability.exact_id] += 1
+            if not unit.is_ready and (self.race != Race.Terran or not unit.is_structure):
+                # If an SCV is constructing a building, already_pending would count this structure twice
+                # (once from the SCV order, and once from "not structure.is_ready")
+                if unit.type_id in CREATION_ABILITY_FIX:
+                    if unit.type_id == UnitTypeId.ARCHON:
+                        # Hotfix for archons in morph state
+                        creation_ability = AbilityId.ARCHON_WARP_TARGET
+                        abilities_amount[creation_ability] += 2
+                    else:
+                        # Hotfix for rich geysirs
+                        creation_ability = CREATION_ABILITY_FIX[unit.type_id]
+                        abilities_amount[creation_ability] += 1
+                else:
+                    creation_ability: AbilityId = self.game_data.units[unit.type_id.value].creation_ability.exact_id
+                    abilities_amount[creation_ability] += 1
+                max_build_progress[creation_ability] = max(
+                    max_build_progress.get(creation_ability, 0), unit.build_progress
+                )
 
         return abilities_amount, max_build_progress
 

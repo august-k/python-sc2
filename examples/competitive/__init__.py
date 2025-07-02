@@ -6,7 +6,7 @@ from loguru import logger
 
 import sc2
 from sc2.client import Client
-from sc2.protocol import ConnectionAlreadyClosedError
+from sc2.protocol import ConnectionAlreadyClosed
 
 
 # Run ladder game
@@ -64,7 +64,7 @@ async def join_ladder_game(host, port, players, realtime, portconfig, save_repla
             await client.save_replay(save_replay_as)
         # await client.leave()
         # await client.quit()
-    except ConnectionAlreadyClosedError:
+    except ConnectionAlreadyClosed:
         logger.error("Connection was closed before the game ended")
         return None
     finally:

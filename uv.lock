@@ -275,7 +275,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.11.10" },
-    { name = "loguru", specifier = ">=0.7.3" },
+    { name = "loguru", specifier = ">=0.7.3,<0.8.0" },
     { name = "mpyq", specifier = ">=0.2.5" },
     { name = "numpy", marker = "python_full_version < '3.13'", specifier = ">=2.0.0" },
     { name = "numpy", marker = "python_full_version >= '3.13'", specifier = ">=2.1.0" },
