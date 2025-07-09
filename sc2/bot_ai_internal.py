@@ -587,25 +587,38 @@ class BotAIInternal(ABC):
         """
         :param action:
         """
-        # Always add actions if queued
-        if action.queue:
-            return True
+
+        # prevent move command if unit is already at target position
+        with suppress(AttributeError):
+            # moving to a position
+            if action.ability in {AbilityId.MOVE_MOVE, AbilityId.ATTACK}  and hasattr(action.target, "x"):
+                if round(action.target[0]) == round(action.unit.position[0]) and round(
+                    action.target[1]
+                ) == round(action.unit.position[1]):
+                    return False
+
         if action.unit.orders:
             # action: UnitCommand
             # current_action: UnitOrder
-            current_action = action.unit.orders[0]
-            if action.ability not in {current_action.ability.id, current_action.ability.exact_id}:
-                # Different action, return True
+            for current_action in action.unit.orders:
+                # current_action = action.unit.orders[0]
+                if (
+                    current_action.ability.id != action.ability
+                    and current_action.ability.exact_id != action.ability
+                ):
+                    # Different action, return True
+                    return True
+                with suppress(AttributeError):
+                    if current_action.target == action.target.tag:
+                        # Same action, remove action if same target unit
+                        return False
+                with suppress(AttributeError):
+                    if round(action.target.x) == round(
+                        current_action.target.x
+                    ) and round(action.target.y) == round(current_action.target.y):
+                        # Same action, remove action if same target position
+                        return False
                 return True
-            with suppress(AttributeError):
-                if current_action.target == action.target.tag:
-                    # Same action, remove action if same target unit
-                    return False
-            with suppress(AttributeError):
-                if action.target.x == current_action.target.x and action.target.y == current_action.target.y:
-                    # Same action, remove action if same target position
-                    return False
-            return True
         return True
 
     @final
