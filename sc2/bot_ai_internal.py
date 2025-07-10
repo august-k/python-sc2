@@ -127,6 +127,7 @@ class BotAIInternal(ABC):
         self._last_step_step_time: float = 0
         self._total_time_in_on_step: float = 0
         self._total_steps_iterations: int = 0
+        self._unit_abilities: dict[int, set[AbilityId]] = {}
         # Internally used to keep track which units received an action in this frame, so that self.train() function does not give the same larva two orders - cleared every frame
         self.unit_tags_received_action: set[int] = set()
 
@@ -660,7 +661,7 @@ class BotAIInternal(ABC):
         self._time_before_step: float = time.perf_counter()
 
     @final
-    def _prepare_step(self, state, proto_game_info) -> None:
+    async def _prepare_step(self, state, proto_game_info) -> None:
         """
         :param state:
         :param proto_game_info:
@@ -695,6 +696,11 @@ class BotAIInternal(ABC):
 
         self.idle_worker_count: int = state.common.idle_worker_count
         self.army_count: int = state.common.army_count
+
+        self._unit_abilities = await self.client.query_available_abilities_with_tag(
+            self.units,
+            ignore_resource_requirements=False,
+        )
         self._time_before_step: float = time.perf_counter()
 
         if self.enemy_race == Race.Random and self.all_enemy_units:
@@ -836,7 +842,7 @@ class BotAIInternal(ABC):
         state = await self.client.observation()
         gs = GameState(state.observation)
         proto_game_info = await self.client._execute(game_info=sc_pb.RequestGameInfo())
-        self._prepare_step(gs, proto_game_info)
+        await  self._prepare_step(gs, proto_game_info)
         await self.issue_events()
 
     @final
