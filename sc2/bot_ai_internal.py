@@ -697,10 +697,15 @@ class BotAIInternal(ABC):
         self.idle_worker_count: int = state.common.idle_worker_count
         self.army_count: int = state.common.army_count
 
-        self._unit_abilities = await self.client.query_available_abilities_with_tag(
-            self.all_units,
+        _unit_only_abilities = await self.client.query_available_abilities_with_tag(
+            self.units,
             ignore_resource_requirements=False,
         )
+        _structure_abilities = await self.client.query_available_abilities_with_tag(
+            self.structures,
+            ignore_resource_requirements=True,
+        )
+        self._unit_abilities = _unit_only_abilities | _structure_abilities
         self._time_before_step: float = time.perf_counter()
 
         if self.enemy_race == Race.Random and self.all_enemy_units:
