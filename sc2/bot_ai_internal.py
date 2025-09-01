@@ -130,6 +130,9 @@ class BotAIInternal(ABC):
         self._unit_abilities: dict[int, set[AbilityId]] = {}
         # Internally used to keep track which units received an action in this frame, so that self.train() function does not give the same larva two orders - cleared every frame
         self.unit_tags_received_action: set[int] = set()
+        # don't store used tumors, for performance reasons
+        # when querying / caching abilities
+        self._used_tumors: set[int] = set()
 
     @final
     @property
@@ -772,9 +775,17 @@ class BotAIInternal(ABC):
                         self.destructables.append(unit_obj)
                 # Alliance.Self.value = 1
                 elif alliance == 1:
+                    tag: int = unit_obj.tag
+
                     self.all_own_units.append(unit_obj)
                     unit_id: UnitTypeId = unit_obj.type_id
                     if unit_obj.is_structure:
+                        if tag in self._used_tumors:
+                            continue
+                        if unit_id == UnitTypeId.CREEPTUMORBURROWED:
+                            if not unit_obj.is_idle and isinstance(unit_obj.order_target, Point2):
+                                self._used_tumors.add(unit_obj.tag)
+                                continue
                         self.structures.append(unit_obj)
                         if unit_id in race_townhalls[self.race]:
                             self.townhalls.append(unit_obj)
