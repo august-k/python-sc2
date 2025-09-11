@@ -49,6 +49,23 @@ if TYPE_CHECKING:
     from sc2.client import Client
     from sc2.game_info import GameInfo
 
+UNIT_TYPES_NOT_IN_SLIM: set[UnitTypeId] = {
+    UnitTypeId.EGG,
+    UnitTypeId.LARVA,
+    UnitTypeId.CHANGELINGMARINE,
+    UnitTypeId.CHANGELINGMARINESHIELD,
+    UnitTypeId.CHANGELINGZEALOT,
+    UnitTypeId.CHANGELINGZERGLING,
+    UnitTypeId.CHANGELINGZERGLINGWINGS,
+    UnitTypeId.CREEPTUMOR,
+    UnitTypeId.CREEPTUMORQUEEN,
+    UnitTypeId.DRONE,
+    UnitTypeId.DRONEBURROWED,
+    UnitTypeId.SCV,
+    UnitTypeId.PROBE,
+    UnitTypeId.MULE,
+}
+
 
 class BotAIInternal(ABC):
     """Base class for bots."""
@@ -83,6 +100,8 @@ class BotAIInternal(ABC):
         self.townhalls: Units = Units([], self)
         self.gas_buildings: Units = Units([], self)
         self.all_own_units: Units = Units([], self)
+        self.own_units_slim: Units = Units([], self)
+        self.own_structures_slim: Units = Units([], self)
         self.enemy_units: Units = Units([], self)
         self.enemy_structures: Units = Units([], self)
         self.all_enemy_units: Units = Units([], self)
@@ -701,11 +720,11 @@ class BotAIInternal(ABC):
         self.army_count: int = state.common.army_count
 
         _unit_only_abilities = await self.client.query_available_abilities_with_tag(
-            self.units,
+            self.own_units_slim,
             ignore_resource_requirements=False,
         )
         _structure_abilities = await self.client.query_available_abilities_with_tag(
-            self.structures,
+            self.own_structures_slim,
             ignore_resource_requirements=True,
         )
         self._unit_abilities = _unit_only_abilities | _structure_abilities
@@ -723,6 +742,8 @@ class BotAIInternal(ABC):
         self.workers: Units = Units([], self)
         self.larva: Units = Units([], self)
         self.structures: Units = Units([], self)
+        self.own_units_slim: Units = Units([], self)
+        self.own_structures_slim: Units = Units([], self)
         self.townhalls: Units = Units([], self)
         self.gas_buildings: Units = Units([], self)
         self.all_own_units: Units = Units([], self)
@@ -751,6 +772,9 @@ class BotAIInternal(ABC):
                     self.state.effects.add(EffectData(unit, fake=True))
                     continue
                 unit_obj = Unit(unit, self, distance_calculation_index=index, base_build=self.base_build)
+                tag: int = unit_obj.tag
+                if tag in self._used_tumors:
+                    continue
                 index += 1
                 self.all_units.append(unit_obj)
                 if unit.display_type == IS_PLACEHOLDER:
@@ -775,13 +799,13 @@ class BotAIInternal(ABC):
                         self.destructables.append(unit_obj)
                 # Alliance.Self.value = 1
                 elif alliance == 1:
-                    tag: int = unit_obj.tag
 
                     self.all_own_units.append(unit_obj)
                     unit_id: UnitTypeId = unit_obj.type_id
                     if unit_obj.is_structure:
-                        if tag in self._used_tumors:
-                            continue
+                        if unit_id not in UNIT_TYPES_NOT_IN_SLIM:
+                            self.own_structures_slim.append(unit_obj)
+
                         if unit_id == UnitTypeId.CREEPTUMORBURROWED:
                             if not unit_obj.is_idle and isinstance(unit_obj.order_target, Point2):
                                 self._used_tumors.add(unit_obj.tag)
@@ -808,6 +832,8 @@ class BotAIInternal(ABC):
                             self.reactor_tags.add(unit_obj.tag)
                     else:
                         self.units.append(unit_obj)
+                        if unit_id not in UNIT_TYPES_NOT_IN_SLIM:
+                            self.own_units_slim.append(unit_obj)
                         if unit_id in worker_types:
                             self.workers.append(unit_obj)
                         elif unit_id == UnitTypeId.LARVA:
