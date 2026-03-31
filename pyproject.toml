@@ -33,10 +33,10 @@ dependencies = [
     "numpy>=2.1.0; python_full_version >= '3.13'",
     "numpy>=2.0.0; python_full_version < '3.13'",
     "portpicker>=1.6.0",
-    "protobuf<4.0.0",
-    "s2clientprotocol>=5.0.14.93333.0",
+    "protobuf>=6.0,<8.0",
     "scipy>=1.14.1; python_full_version >= '3.13'",
     "scipy>=1.7.1; python_full_version < '3.13'",
+    "pys2clientprotocol (>=1.0.2,<2.0.0)",
 ]
 
 [dependency-groups]
